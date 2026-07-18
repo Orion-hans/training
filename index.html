@@ -102,6 +102,7 @@ input[type=range]{flex:1;accent-color:var(--mint)}
 .numin::-webkit-outer-spin-button,.numin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .val{width:54px;text-align:right;color:var(--text);font-size:0.8125rem;font-variant-numeric:tabular-nums;font-family:"Space Grotesk",sans-serif}
 #scoreCard{background:#f7f5ef;border-radius:12px;margin-top:10px;padding:6px 4px;overflow-x:auto;min-height:60px}
+#errBar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:2px 0 8px}#errBar.hide{display:none}.ebSel{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:.45em .6em;font-size:.85rem;font-weight:600}.ebSeg{display:flex;gap:4px}.ebSeg button{background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.4em .8em;font-size:.78rem;font-weight:600;cursor:pointer}.ebSeg button.on{background:var(--mint);color:#10231d;border-color:var(--mint);font-weight:800}
 #scoreCard svg{display:block;margin:0 auto;max-width:100%;height:auto}
 #ansScore svg{display:block;margin:0 auto;max-width:100%;max-height:150px}
 /* 큰 화면(아이패드 등)에서 악보 패널만 화면 폭에 맞게 넓게 — 컨트롤은 그대로, 가로 스크롤 없음 */
@@ -268,6 +269,8 @@ input[type=range]{flex:1;accent-color:var(--mint)}
     <div id="ssCard" class="hide"><div class="scoremsg">[생성]을 눌러 시창 멜로디를 만드세요</div></div>
     <div class="prompt" id="prompt">들어보기를 눌러 시작</div>
   </div>
+  <div class="hide" id="errBar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 8px"></div>
+  <div class="hide" id="errScore" style="margin:2px 0 8px;background:#f7f5ef;border-radius:14px;padding:10px 8px;overflow-x:auto"></div>
   <div class="hide" id="ansScore" style="margin:2px 0 8px;background:#f7f5ef;border-radius:14px;padding:16px;min-height:128px;display:flex;align-items:center;justify-content:center"></div>
   <div class="choices" id="choices"></div>
   <div class="bar" id="quizBar">
@@ -608,7 +611,7 @@ function pickSig(){const s=SIGS[(Math.random()*SIGS.length)|0].split('/');return
 /* ---------- 상태 ---------- */
 let mode='rhythm',quizMode='interval'; // quizMode = 청음 탭에서 마지막으로 고른 음정/화음
 const cfg={iv:{diff:'중급',dir:'상행'},ch:{diff:'중급',arp:false},cp:{diff:'초급',play:'동시'},pg:{mode:'자동'},cd:{mode:'자동'},in:{seventh:true,play:'분산'}};
-const stats={interval:{c:0,t:0,s:0},chord:{c:0,t:0,s:0},counter:{c:0,t:0,s:0},prog:{c:0,t:0,s:0},cadence:{c:0,t:0,s:0},inversion:{c:0,t:0,s:0}};
+const stats={interval:{c:0,t:0,s:0},chord:{c:0,t:0,s:0},counter:{c:0,t:0,s:0},prog:{c:0,t:0,s:0},cadence:{c:0,t:0,s:0},inversion:{c:0,t:0,s:0},err:{c:0,t:0,s:0}};
 let cur=null,answered=false;
 const R={num:4,den:4,unit:'4',sig:'4/4',group:'auto',clef:'treble',measures:8,bpm:96,pianoMode:'아르페지오',fermata:'끔',countIn:'한마디',auto:false,endless:false,functional:true,extAmt:50,secAmt:40,meterFreq:'끔',freq:'가끔',keySel:'C',perLine:'4',lines:'2',melody:'관악',harmony:'현+관',inst:{타악:true},dynamics:'켬',cadence:'켬',rhythmColor:'켬',key:0,minor:false,_curKey:null,measuresData:null};
 function syncMeas(){R.measures=(+R.perLine||4)*(+R.lines||1);} // 총 마디 = 줄당마디 × 줄수
@@ -734,6 +737,11 @@ function answer(val){if(answered)return;answered=true;const s=stats[mode];s.t++;
   $('prompt').innerHTML=ok?'정답 — <b>'+cur.answer+'</b>':'정답은 <b>'+cur.answer+'</b>';
   if(mode==='chord'){const sym=noteName(((cur.root%12)+12)%12,false)+CHORD_SYM[cur.answer];$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+sym+'</b> <span style="color:var(--muted)">('+cur.answer+')</span>';}
   else if(mode==='counter'){$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'</b> <span style="color:var(--muted);font-size:13px">· '+(CP_DESC[cur.answer]||'')+'</span>';}
+  else if(mode==='err'&&cur.kind==='harm'){const V=['베이스','테너','알토','소프라노'];const wr=cur.notes[cur.ei][cur.vi],pl=cur.played[cur.ei][cur.vi];const dir=cur.delta>0?'높게':'낮게';const amt=Math.abs(cur.delta)===1?'반음':'온음';const rnm=roman(cur.degs[cur.ei],ERRCFG.minor,false);const _fl=errFlat();$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'번째 화음('+rnm+')</b> · '+V[cur.vi]+' 성부가 악보 <b>'+noteName(((wr%12)+12)%12,_fl)+'</b>인데 <b>'+noteName(((pl%12)+12)%12,cur.delta<0?true:_fl)+'</b>로 '+amt+' '+dir+' 연주됐어요. 리허설: \"'+cur.answer+'번째 화음 '+V[cur.vi]+' 성부, '+noteName(((wr%12)+12)%12,_fl)+'입니다\"';}
+  else if(mode==='err'&&cur.kind==='score'&&cur.etype==='chord'){const _fl3=R.measuresData[cur.mi].useFlat;const wm=cur.wasChord[cur.vi],pm=wm+cur.delta;const wn3=noteName(((wm%12)+12)%12,_fl3),pn3=noteName(((pm%12)+12)%12,cur.delta<0?true:_fl3);const dir3=cur.delta>0?'높게':'낮게';const amt3=Math.abs(cur.delta)===1?'반음':'온음';$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'마디</b> · <b>반주 화음 '+cur.cname+(cur.roman?'('+cur.roman+')':'')+'</b>의 구성음 <b>'+wn3+'</b>이 <b>'+pn3+'</b>로 '+amt3+' '+dir3+' 연주됐어요. 리허설: \"'+cur.answer+'마디 화음, '+wn3+' 확인하세요\"';}
+  else if(mode==='err'&&cur.kind==='score'){const _fl2=R.measuresData[cur.mi].useFlat;const wn=noteName(((cur.wasMidi%12)+12)%12,_fl2);if(cur.etype==='pitch'){const pn=noteName((((cur.wasMidi+cur.delta)%12)+12)%12,cur.delta<0?true:_fl2);const dir=cur.delta>0?'높게':'낮게';const amt=Math.abs(cur.delta)===1?'반음':'온음';$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'마디</b> · '+cur.ord+'번째 음이 악보 <b>'+wn+'</b>인데 <b>'+pn+'</b>로 '+amt+' '+dir+' 연주됐어요. 리허설: \"'+cur.answer+'마디 '+cur.ord+'번째 음, '+wn+'입니다\"';}else{const wtx=cur.wasQl===1?'4분음표':'8분음표';const ntx=cur.wasQl===1?'짧게(당겨짐)':'길게(늘어짐)';$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'마디</b> · '+cur.ord+'번째 음이 악보는 <b>'+wtx+'</b>인데 '+ntx+' 연주됐어요. 리허설: \"'+cur.answer+'마디 '+cur.ord+'번째 음, 박 지켜서\"';}}
+  else if(mode==='err'&&cur.kind==='rhy'){const was=cur.durs[cur.ei],now=cur.pdurs[cur.ei];const wtx=was==='q'?'4\ubd84\uc74c\ud45c':'8\ubd84\uc74c\ud45c';const ntx=now==='q'?'\uae38\uac8c(\ub298\uc5b4\uc9d0)':'\uc9e7\uac8c(\ub2f9\uaca8\uc9d0)';$('prompt').innerHTML=(ok?'\uc815\ub2f5 \u2014 ':'\uc815\ub2f5\uc740 ')+'<b>'+cur.answer+'\ubc88\uc9f8 \uc74c</b> \u00b7 \uc545\ubcf4\ub294 <b>'+wtx+'</b>\uc778\ub370 '+ntx+' \uc5f0\uc8fc\ub410\uc5b4\uc694. \ub9ac\ud5c8\uc124: \"'+cur.answer+'\ubc88\uc9f8 \uc74c, \ubc15 \uc9c0\ucf1c\uc11c '+wtx+' \uae38\uc774\ub85c\"';}
+  else if(mode==='err'){const wr=cur.notes[cur.ei],pl=cur.played[cur.ei];const dir=cur.delta>0?'높게':'낮게';const amt=Math.abs(cur.delta)===1?'반음':'온음';const _fl=errFlat();$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'번째</b> · 악보 <b>'+noteName(((wr%12)+12)%12,_fl)+'</b>인데 <b>'+noteName(((pl%12)+12)%12,cur.delta<0?true:_fl)+'</b>로 '+amt+' '+dir+' 연주됐어요. 리허설이라면: \"'+cur.answer+'번째 음, '+noteName(((wr%12)+12)%12,_fl)+'입니다\"';}
   else if(mode==='prog'){renderAnswerScore(cur.prog);$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'</b> <span style="color:var(--muted);font-size:13px">· '+cur.syms.join('–')+'</span>';}
   else if(mode==='cadence'){renderAnswerScore(cur.prog);$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'</b> <span style="color:var(--muted);font-size:13px">· '+(CAD_DESC[cur.answer]||'')+(cur.phryg?' · 프리지아 형(iv6→V)':'')+' ('+cur.syms.join('–')+')</span>';}
   else if(mode==='inversion'){renderAnswerScore([cur.notes]);const slash=cur.answer==='근음 위치'?cur.sym:cur.sym+'/'+cur.bassName;$('prompt').innerHTML=(ok?'정답 — ':'정답은 ')+'<b>'+cur.answer+'</b> <span style="color:var(--muted);font-size:13px">· '+slash+' ('+(INV_DESC[cur.answer]||'')+')</span>';}
@@ -741,12 +749,248 @@ function answer(val){if(answered)return;answered=true;const s=stats[mode];s.t++;
   if(mode==='interval'){const lo=cur.root,hi=cur.root+cur.semi;const ev=(cfg.iv.dir==='화음')?[[lo,hi]]:(cfg.iv.dir==='하행')?[[hi],[lo]]:[[lo],[hi]];renderAnswerScore(ev);} // 상행 낮은→높은, 하행 높은→낮은, 화음 동시
   else if(mode==='chord'){renderAnswerScore([cur.iv.map(iv=>cur.root+iv)]);}
   else if(mode==='counter'){renderAnswerScore(cur.voices);}}
+
+/* ---------- 오류 찾기 v6: 4/4 마디·박자표·빔 ---------- */
+const ERRCFG={bars:2,kind:'score',force:null,tonic:0,minor:false};
+const ERR_MAJSIG={0:0,7:1,2:2,9:3,4:4,11:5,6:6,5:-1,10:-2,3:-3,8:-4,1:-5};
+const ERR_MINSIG={9:0,4:1,11:2,6:3,1:4,8:5,2:-1,7:-2,0:-3,5:-4,10:-5,3:-6};
+const ERR_MAJNM={0:'C',7:'G',2:'D',9:'A',4:'E',11:'B',6:'F\u266f',5:'F',10:'B\u266d',3:'E\u266d',8:'A\u266d',1:'D\u266d'};
+const ERR_MINNM={9:'A',4:'E',11:'B',6:'F\u266f',1:'C\u266f',8:'G\u266f',2:'D',7:'G',0:'C',5:'F',10:'B\u266d',3:'E\u266d'};
+const ERR_VEXMAJ={0:'C',7:'G',2:'D',9:'A',4:'E',11:'B',6:'F#',5:'F',10:'Bb',3:'Eb',8:'Ab',1:'Db'};
+const ERR_VEXMIN={9:'Am',4:'Em',11:'Bm',6:'F#m',1:'C#m',8:'G#m',2:'Dm',7:'Gm',0:'Cm',5:'Fm',10:'Bbm',3:'Ebm'};
+function errSig(){return ERRCFG.minor?ERR_MINSIG[ERRCFG.tonic]:ERR_MAJSIG[ERRCFG.tonic];}
+function errFlat(){return errSig()<0;}
+function errName(){return (ERRCFG.minor?ERR_MINNM[ERRCFG.tonic]:ERR_MAJNM[ERRCFG.tonic])+(ERRCFG.minor?' \ub2e8\uc870':' \uc7a5\uc870');}
+function errVexSpec(){return ERRCFG.minor?ERR_VEXMIN[ERRCFG.tonic]:ERR_VEXMAJ[ERRCFG.tonic];}
+const ERR_SHARP=[6,1,8,3,10,5,0],ERR_FLAT=[10,3,8,1,6,11,4],ERR_NAT=[0,2,4,5,7,9,11];
+function errLetterOf(pc){const sig=errSig();
+  if(sig>0&&ERR_SHARP.slice(0,sig).includes(pc))return ERR_NAT.indexOf(((pc-1)+12)%12);
+  if(sig<0&&ERR_FLAT.slice(0,-sig).includes(pc))return ERR_NAT.indexOf((pc+1)%12);
+  const li=ERR_NAT.indexOf(pc);return li>=0?li:-1;}
+function errKeyEx(midi){
+  const pc=((midi%12)+12)%12,sig=errSig();
+  let li=errLetterOf(pc);
+  if(li<0){li=ERR_NAT.indexOf(((pc-1)+12)%12);if(li<0)li=ERR_NAT.indexOf((pc+1)%12);if(li<0)li=0;}
+  const base=ERR_NAT[li];
+  const eff=(sig>0&&ERR_SHARP.slice(0,sig).includes((base+1)%12))?1:((sig<0&&ERR_FLAT.slice(0,-sig).includes(((base-1)+12)%12))?-1:0);
+  let d=((pc-base)%12+12)%12;if(d>6)d-=12;
+  const acc=(d===eff)?null:({'-2':'bb','-1':'b','0':'n','1':'#','2':'##'}[String(d)]||null);
+  const o=Math.round((midi-base)/12);
+  return {key:'cdefgab'[li]+'/'+(o-1),acc:acc};}
+function errScale(){return ERRCFG.minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11];}
+function errDegStep(midi,step){const key=ERRCFG.tonic,sc=errScale();
+  const rel=((midi-key)%12+12)%12;let di=0;for(let i=0;i<7;i++)if(sc[i]<=rel)di=i;
+  const oct=Math.floor((midi-key)/12);let pos=oct*7+di+step;const no=Math.floor(pos/7),ni=((pos%7)+7)%7;
+  return key+no*12+sc[ni];}
+function errDelta(){return (Math.random()<0.5?-1:1)*(Math.random()<0.5?1:2);}
+function errStart(){const k=ERRCFG.tonic;return 60+((k<=4)?k:k-12);}
+function errMelody(N){
+  let notes=[errStart()+[0,errScale()[2],7][(Math.random()*3)|0]];
+  while(notes.length<N){
+    const prev=notes[notes.length-1];let cand=[];
+    for(const o of [-2,-1,1,2,1,-1,3,-3]){const pi=errDegStep(prev,o);if(pi>=57&&pi<=81)cand.push(pi);}
+    notes.push(cand[(Math.random()*cand.length)|0]||prev);
+  }
+  return notes;}
+function errRhythmCells(beats,pEighth){ /* 박 단위: 'q' 또는 '88' */
+  const cells=[];for(let b2=0;b2<beats;b2++)cells.push(Math.random()<pEighth?'88':'q');
+  return cells;}
+function errDursFromCells(cells){const d=[];cells.forEach(c=>{if(c==='q')d.push('q');else{d.push('8');d.push('8');}});return d;}
+function newErr(){newErrS();}
+function newErrM(){
+  const beats=4*ERRCFG.bars,notes=errMelody(beats);
+  const ei=1+((Math.random()*(beats-1))|0),delta=errDelta();
+  const played=notes.slice();played[ei]=notes[ei]+delta;
+  cur={kind:'mel',answer:String(ei+1),notes,played,ei,delta,durs:notes.map(()=>'q')};
+  answered=false;show('ansScore',false);
+  renderErr(notes.map(m=>[m]),cur.durs);
+  renderChoices(Array.from({length:beats},(_,i)=>String(i+1)));
+  $('prompt').innerHTML='<b>'+errName()+'</b> \u00b7 4/4 \u00b7 \uc545\ubcf4\uc640 <b>\ub2e4\ub974\uac8c \uc5f0\uc8fc\ub41c \uc74c</b>\uc740 \uba87 \ubc88\uc9f8\uc77c\uae4c\uc694?';
+}
+function newErrR(){
+  const beats=4*ERRCFG.bars;
+  const cells=errRhythmCells(beats,0.42);
+  if(!cells.includes('88'))cells[1+((Math.random()*(beats-1))|0)]='88';
+  const durs=errDursFromCells(cells);
+  const notes=errMelody(durs.length);
+  const cand=[];durs.forEach((d,i)=>{if(i>0)cand.push(i);});
+  const ei=cand[(Math.random()*cand.length)|0];
+  const pd=durs.slice();pd[ei]=(durs[ei]==='q')?'8':'q';
+  cur={kind:'rhy',answer:String(ei+1),notes,played:notes.slice(),ei,durs,pdurs:pd};
+  answered=false;show('ansScore',false);
+  renderErr(notes.map(m=>[m]),durs);
+  renderChoices(Array.from({length:durs.length},(_,i)=>String(i+1)));
+  $('prompt').innerHTML='<b>'+errName()+'</b> \u00b7 4/4 \u00b7 \ud55c \uc74c\uc758 <b>\ubc15\uc790(\uae38\uc774)</b>\uac00 \uc545\ubcf4\uc640 \ub2ec\ub77c\uc694 \u2014 \uba87 \ubc88\uc9f8\uc77c\uae4c\uc694?';
+}
+function newErrH(){
+  const N=4*ERRCFG.bars,key=ERRCFG.tonic,mi=ERRCFG.minor;
+  const POOL=[[1,4,5,1],[1,6,4,5],[1,2,5,1],[1,4,2,5],[6,4,1,5],[1,5,6,4]];
+  let degs=POOL[(Math.random()*POOL.length)|0].slice();
+  while(degs.length<N)degs=degs.concat(POOL[(Math.random()*POOL.length)|0]);
+  degs=degs.slice(0,N);
+  const chords=degs.map(d=>{const up=chordMidis(d,key,mi,5,false);return [up[0]-12].concat(up);});
+  const ci=1+((Math.random()*(N-1))|0),vi=(Math.random()*4)|0,delta=errDelta();
+  const played=chords.map(c=>c.slice());played[ci][vi]+=delta;
+  cur={kind:'harm',answer:String(ci+1),notes:chords,played,ei:ci,vi,delta,degs,durs:chords.map(()=>'q')};
+  answered=false;show('ansScore',false);
+  renderErr(chords,cur.durs);
+  renderChoices(Array.from({length:N},(_,i)=>String(i+1)));
+  $('prompt').innerHTML='<b>'+errName()+'</b> \u00b7 4/4 \u00b7 \uc545\ubcf4\uc640 <b>\ub2e4\ub974\uac8c \uc5f0\uc8fc\ub41c \ud654\uc74c</b>\uc740 \uba87 \ubc88\uc9f8\uc77c\uae4c\uc694?';
+}
+function newErrS(){
+  genArrangement();
+  const flat=[];
+  R.measuresData.forEach((md,mi)=>{md.cells.forEach((c,ci)=>{if(c.midi!=null)flat.push({mi,ci,midi:c.midi,ql:c.ql,tup:c.tup||0});});});
+  if(flat.length<4){genArrangement();}
+  const r=Math.random();
+  let etype = ERRCFG.force||(r<0.45?'pitch':(r<0.72?'rhy':'chord'));
+  const delta=errDelta();
+  if(etype==='chord'){
+    const mi=1+((Math.random()*(R.measures-1))|0);
+    const md=R.measuresData[mi];
+    if(!md.midis||md.midis.length<3){etype='pitch';}
+    else{
+      const vi=(Math.random()*md.midis.length)|0;
+      cur={kind:'score',etype:'chord',answer:String(mi+1),mi,vi,delta,
+           wasChord:md.midis.slice(),roman:md.roman||'',cname:md.name||''};
+    }
+  }
+  if(etype!=='chord'){
+    const cands=flat.filter(f=>etype!=='rhy'||(!f.tup&&(f.ql===1||f.ql===0.5)));
+    const pick=(cands.length?cands:flat)[ (Math.random()*(cands.length?cands.length:flat.length))|0 ];
+    if(etype==='rhy'&&(pick.tup||!(pick.ql===1||pick.ql===0.5)))etype='pitch';
+    cur={kind:'score',etype,answer:String(pick.mi+1),mi:pick.mi,ci:pick.ci,delta,
+         wasMidi:pick.midi,wasQl:pick.ql,
+         ord:R.measuresData[pick.mi].cells.slice(0,pick.ci+1).filter(c=>c.midi!=null).length};
+  }
+  answered=false;show('ansScore',false);show('errScore',false);show('scorePanel',true);
+  renderScore();
+  renderChoices(Array.from({length:R.measures},(_,i)=>(i+1)+'\ub9c8\ub514'),Array.from({length:R.measures},(_,i)=>String(i+1)));
+  $('prompt').innerHTML='\uc624\ub958\ub294 \ud558\ub098 \u2014 <b>\uc74c\uc815\u00b7\ubc15\uc790\u00b7\ud654\uc74c</b> \uc911 \ubb34\uc5c7\uc774\ub4e0 \uc62c \uc218 \uc788\uc5b4\uc694. \uc624\ub958\uac00 \uc788\ub294 <b>\ub9c8\ub514</b>\ub294?';
+}
+function playErrS(){
+  ensureCtx();let at=ctx.currentTime+0.15;
+  R.measuresData.forEach((md,mi)=>{
+    const spq=(60/md.bpm)/unitQL(R.unit);
+    const mLen=md.q*spq;
+    /* \ubc18\uc8fc \ud654\uc74c: \ub9c8\ub514 \uc2dc\uc791 + \uc911\uac04 */
+    let chord=(md.midis||[]).slice();
+    if(cur.etype==='chord'&&mi===cur.mi)chord[cur.vi]=chord[cur.vi]+cur.delta;
+    chord.forEach(m=>{pianoVoice(m-12,at,mLen*0.95);});
+    if(mLen>1.4)chord.forEach(m=>{pianoVoice(m-12,at+mLen/2,mLen*0.45);});
+    let t2=at;
+    md.cells.forEach((c,ci)=>{
+      let ql=c.ql,midi=c.midi;
+      if(cur.etype!=='chord'&&mi===cur.mi&&ci===cur.ci){
+        if(cur.etype==='pitch')midi=midi+cur.delta;
+        else ql=(cur.wasQl===1?0.5:1);
+      }
+      const baseQl=(c.tup?c.ql*(c.tup===3?2/3:1):c.ql);
+      const sec=((cur.etype!=='chord'&&mi===cur.mi&&ci===cur.ci)?ql:baseQl)*spq;
+      if(midi!=null)pianoVoice(midi,t2,Math.max(0.12,sec*0.92));
+      t2+=sec;
+    });
+    at+=mLen;
+  });
+}
+function playErr(){if(cur&&cur.kind==='score'){playErrS();return;}ensureCtx();const t=ctx.currentTime+0.1;
+  if(cur.kind==='harm'){cur.played.forEach((ch,i)=>ch.forEach(m=>pianoVoice(m,t+i*0.9,0.85)));return;}
+  const durs=(cur.kind==='rhy')?cur.pdurs:cur.durs;let at=t;
+  cur.played.forEach((m,i)=>{const L=(durs[i]==='8')?0.3:0.6;pianoVoice(m,at,L*0.95);at+=L;});}
+function renderErr(cols,durs){
+  const host=$('errScore');host.innerHTML='';
+  if(!(window.Vex&&Vex.Flow)){host.innerHTML='<div style="padding:14px;color:#7c8188">\uc545\ubcf4\ub294 \uc778\ud130\ub137 \uc5f0\uacb0\uc774 \ud544\uc694\ud569\ub2c8\ub2e4 (\uc18c\ub9ac\u00b7\uc815\ub2f5\uc740 \uc815\uc0c1)</div>';return;}
+  const VF=Vex.Flow,vk=errVexSpec();
+  try{
+    const W=Math.max(340,(host.clientWidth||620)-18),H=254;
+    const rend=new VF.Renderer(host,VF.Renderer.Backends.SVG);
+    rend.resize(W,H);const c2=rend.getContext();
+    const top=new VF.Stave(10,16,W-18),bot=new VF.Stave(10,116,W-18);
+    top.addClef('treble').addKeySignature(vk).addTimeSignature('4/4');
+    bot.addClef('bass').addKeySignature(vk).addTimeSignature('4/4');
+    top.setContext(c2).draw();bot.setContext(c2).draw();
+    new VF.StaveConnector(top,bot).setType(VF.StaveConnector.type.BRACE).setContext(c2).draw();
+    new VF.StaveConnector(top,bot).setType(VF.StaveConnector.type.SINGLE_LEFT).setContext(c2).draw();
+    const mkN=(mids,clef,dur)=>{const exs=mids.map(errKeyEx);
+      const n=new VF.StaveNote({clef:clef,keys:exs.map(x=>x.key),duration:dur});
+      exs.forEach((x,ix)=>{if(x.acc){try{n.addModifier(new VF.Accidental(x.acc),ix);}catch(_a){}}});
+      return n;};
+    const tT=[],bT=[],lab=[],beams=[];
+    let beatAcc=0,run=[];
+    const flushRun=()=>{if(run.length>=2){try{beams.push(new VF.Beam(run.slice()));}catch(_b){}}run=[];};
+    cols.forEach((col,i)=>{
+      const dur=(durs&&durs[i])||'q';
+      let tn,bn;
+      if(col.length===1){const m=col[0];
+        if(m>=60){tn=mkN([m],'treble',dur);bn=new VF.GhostNote({duration:dur});}
+        else{bn=mkN([m],'bass',dur);tn=new VF.GhostNote({duration:dur});}}
+      else{tn=mkN(col.slice(1),'treble',dur);bn=mkN([col[0]],'bass',dur);}
+      tT.push(tn);bT.push(bn);lab.push({t:tn,b:bn,one:col.length===1,low:col.length===1&&col[0]<60,num:i+1});
+      /* \ube54: \uac19\uc740 \ubc15 \uc548 8\ubd84\uc74c \ubb36\uae30 */
+      if(dur==='8'){ if(tn instanceof VF.StaveNote)run.push(tn); beatAcc+=0.5; if(Math.abs(beatAcc-Math.round(beatAcc))<1e-6)flushRun(); }
+      else{flushRun();beatAcc+=1;}
+      /* \ub9c8\ub514\uc904 */
+      if(Math.abs(beatAcc-4)<1e-6&&i<cols.length-1){
+        flushRun();
+        tT.push(new VF.BarNote());bT.push(new VF.BarNote());beatAcc=0;
+      }
+    });
+    flushRun();
+    const totQ=cols.reduce((a,_c,i)=>a+(((durs&&durs[i])||'q')==='8'?0.5:1),0);
+    const tv=new VF.Voice({num_beats:totQ,beat_value:4}).setStrict(false).addTickables(tT);
+    const bv=new VF.Voice({num_beats:totQ,beat_value:4}).setStrict(false).addTickables(bT);
+    new VF.Formatter().joinVoices([tv]).joinVoices([bv]).format([tv,bv],W-18-(top.getNoteStartX()-top.getX())-16);
+    tv.draw(c2,top);bv.draw(c2,bot);
+    beams.forEach(bm=>{try{bm.setContext(c2).draw();}catch(_d){}});
+    c2.setFont('Space Grotesk',12,'700');c2.setFillStyle('#7c8188');
+    lab.forEach(o=>{try{const src=o.one&&o.low?o.b:o.t;c2.fillText(String(o.num),src.getAbsoluteX()-3,H-12);}catch(_e){}});
+  }catch(err){host.innerHTML='<div style="padding:14px;color:#7c8188">\uc545\ubcf4 \ub80c\ub354 \uc624\ub958 \u2014 \uc18c\ub9ac\u00b7\uc815\ub2f5\uc740 \uc815\uc0c1 \ub3d9\uc791</div>';}
+}
+function errBarBuild(){
+  const bar=$('errBar');if(bar._b){errBarSync();return;}bar._b=1;
+  let so='';SIGS.forEach(x=>{so+='<option value="'+x+'">'+x+'</option>';});
+  bar.innerHTML='<select id="ebSig" class="ebsel"></select>'
+   +'<select id="ebTonic" class="ebsel"></select>'
+   +'<select id="ebMode" class="ebsel"><option value="0">\uc7a5\uc870</option><option value="1">\ub2e8\uc870</option></select>'
+   +'<span class="ebseg" data-k="force"><button class="btn" data-v="">\ubcf5\ud569</button><button class="btn" data-v="pitch">\uc74c\uc815</button><button class="btn" data-v="rhy">\ubc15\uc790</button><button class="btn" data-v="chord">\ud654\uc74c</button></span>';
+  $('ebSig').innerHTML=so;
+  const st=document.createElement('style');st.textContent='#errBar .ebseg{display:inline-flex;gap:4px}#errBar .btn{padding:6px 12px;font-size:.78rem}#errBar .btn.on{background:var(--mint);color:#0b0f12;border-color:var(--mint)}#errBar .ebsel{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:7px 8px;font-size:.82rem}';
+  document.head.appendChild(st);
+  errBarTonics();
+  $('ebSig').addEventListener('change',e=>{R.sig=e.target.value;applySig();newQuestion();});
+  $('ebTonic').addEventListener('change',e=>{errApplyKey(+e.target.value,$('ebMode').value==='1');newQuestion();});
+  $('ebMode').addEventListener('change',e=>{errApplyKey(+$('ebTonic').value,e.target.value==='1');errBarTonics();newQuestion();});
+  bar.addEventListener('click',e=>{const b=e.target.closest('#errBar .btn');if(!b)return;
+    ERRCFG.force=b.getAttribute('data-v')||null;
+    errBarSync();newQuestion();});
+  errBarSync();
+}
+function errApplyKey(tonic,minor){
+  const k=KEYS.find(x=>x.t===tonic&&x.m===minor);
+  if(k)R.keySel=k.v;
+  ERRCFG.tonic=tonic;ERRCFG.minor=minor;
+}
+function errBarTonics(){
+  const sel=$('ebTonic');if(!sel)return;const mi=$('ebMode')?$('ebMode').value==='1':false;let o='';
+  for(let pc=0;pc<12;pc++){o+='<option value="'+pc+'">'+(mi?ERR_MINNM[pc]:ERR_MAJNM[pc])+'</option>';}
+  sel.innerHTML=o;sel.value=String(ERRCFG.tonic);
+}
+function errBarSync(){
+  const bar=$('errBar');if(!bar._b)return;
+  if($('ebSig'))$('ebSig').value=R.sig;
+  const kk=KEYS.find(x=>x.v===R.keySel);
+  if(kk){ERRCFG.tonic=kk.t;ERRCFG.minor=kk.m;}
+  if($('ebMode'))$('ebMode').value=ERRCFG.minor?'1':'0';
+  errBarTonics();
+  bar.querySelectorAll('.ebseg .btn').forEach(b=>{
+    b.classList.toggle('on',(b.getAttribute('data-v')||null)===(ERRCFG.force||null));});
+}
 function renderChoices(labels,values){const c=$('choices');c.innerHTML='';labels.forEach((lab,i)=>{const v=values?values[i]:lab;const d=document.createElement('div');d.className='choice';d.dataset.v=v;d.textContent=lab;d.onclick=()=>answer(v);c.appendChild(d);});}
 function updateScore(){const s=stats[mode]||{c:0,t:0,s:0};$('correctN').textContent=s.c;$('totalN').textContent=s.t;$('streakN').textContent=s.s;}
 
 /* ---------- 시창(Sight-singing): 음정·화음 ---------- */
 const TONICS=['C','C#','D','E♭','E','F','F#','G','A♭','A','B♭','B'];
-const subMode={interval:'청음',chord:'청음',counter:'청음',prog:'청음',cadence:'청음',inversion:'청음'};
+const subMode={interval:'청음',chord:'청음',counter:'청음',prog:'청음',cadence:'청음',inversion:'청음',err:'청음'};
 const QUIZKINDS=['interval','chord','counter','prog','cadence','inversion'];
 const SS={iv:{tonic:0,ints:['장2','단2','장3','단3','완4','완5'],dir:'상행',len:6,range:16},
   ch:{tonic:0,quals:['장3화음','단3화음'],arp:true},piece:null,count:0};
@@ -1577,7 +1821,7 @@ function renderFileVex(p){
 }
 window.addEventListener('message',function(e){ var d=e.data; if(d&&d.type==='fileVexReq'){ var svg=''; try{svg=renderFileVex(d.payload);}catch(_){} try{ if(e.source) e.source.postMessage({type:'fileVexRes', svg:svg}, '*'); }catch(_){} } });
 
-function renderScore(){if((mode!=='rhythm'&&mode!=='analyze')||!R.measuresData)return;const host=$('scoreCard');
+function renderScore(){if((mode!=='rhythm'&&mode!=='analyze'&&mode!=='err')||!R.measuresData)return;const host=$('scoreCard');
   if(!(window.Vex&&Vex.Flow)){scoreMsg(window.__vexFail?'악보는 인터넷 연결이 필요합니다 (소리·정답은 정상)':'악보 라이브러리를 불러오는 중…');return;}
   const VF=Vex.Flow;const _lay=(mode==='analyze'&&R._anLayout)?R._anLayout:{grand:R.clef==='grand',clef:R.clef==='bass'?'bass':'treble',topClef:'treble',botClef:'bass'};
   const grand=_lay.grand,clef=_lay.clef||'treble',topClef=_lay.topClef||'treble',botClef=_lay.botClef||'bass',btr=(!grand&&clef==='bass')?-24:0,GAP=98;
@@ -1717,13 +1961,13 @@ requestAnimationFrame(draw);
 cv.onclick=()=>{if(mode==='rhythm'||mode==='analyze')loopOn?stopRhythm():startRhythm();else playQuestion();};
 
 /* ---------- 모드 ---------- */
-function newQuestion(){if(mode==='interval')newInterval();else if(mode==='chord')newChord();else if(mode==='counter')newCounter();else if(mode==='prog')newProg();else if(mode==='cadence')newCadence();else if(mode==='inversion')newInversion();}
-function playQuestion(){if(mode==='interval')playInterval();else if(mode==='chord')playChord();else if(mode==='counter')playCounter();else if(mode==='prog')playProg();else if(mode==='cadence')playCadence();else if(mode==='inversion')playInversion();}
+function newQuestion(){if(mode==='interval')newInterval();else if(mode==='chord')newChord();else if(mode==='counter')newCounter();else if(mode==='prog')newProg();else if(mode==='cadence')newCadence();else if(mode==='inversion')newInversion();else if(mode==='err')newErr();}
+function playQuestion(){if(mode==='interval')playInterval();else if(mode==='chord')playChord();else if(mode==='counter')playCounter();else if(mode==='prog')playProg();else if(mode==='cadence')playCadence();else if(mode==='inversion')playInversion();else if(mode==='err')playErr();}
 const show=(id,on)=>$(id).classList.toggle('hide',!on);
 function syncSubSeg(){$('kindSel').value=mode;const canSS=(mode==='interval'||mode==='chord');if(!canSS)subMode[mode]='청음';const sel=$('subSel');for(let i=0;i<sel.options.length;i++){if(sel.options[i].value==='시창')sel.options[i].disabled=!canSS;}sel.value=subMode[mode]||'청음';sel.style.display='';}
 function applySub(){const ss=subMode[mode]==='시창';
   show('ring',!ss);show('ssCard',ss);
-  show('choices',!ss);show('quizBar',!ss);show('score',!ss);
+  show('choices',!ss);show('quizBar',!ss);show('score',!ss);show('errScore',!ss&&mode==='err');
   show('ssBar1',ss);show('ssBar2',ss);show('ssInfo',ss);
   buildSettings();
   if(ss){renderSS();updateSsInfo();$('prompt').innerHTML=SS.piece?'<b>'+SS.piece.label+'</b> · 보고 부르기':'<b>생성</b>을 눌러 시창 시작';}
@@ -1839,13 +2083,13 @@ function ctRenderEditor(){const ml=$('ctMeasList');ml.innerHTML='';
     del.onclick=()=>{if(TR.meas.length>1){TR.meas.splice(mi,1);TR.sel=null;ctRender();ctRestart();}};row.appendChild(del);
     ml.appendChild(row);});}
 const TAB_GROUPS=[
-  {g:'play',subs:[['rhythm','비팅'],['analyze','분석']]},
+  {g:'play',subs:[['rhythm','비팅'],['analyze','분석'],['err','오류 찾기']]},
   {g:'beat',subs:[['meter','전환'],['count','변박']]},
   {g:'quiz',subs:null},
   {g:'ref',subs:[['chordLab','화성'],['scaleDict','음계']]},
   {g:'theory',subs:null}
 ];
-const MODE_GROUP={rhythm:'play',analyze:'play',meter:'beat',count:'beat',scaleDict:'ref',chordLab:'ref',tuner:'tuner',theory:'theory'};
+const MODE_GROUP={rhythm:'play',analyze:'play',err:'play',meter:'beat',count:'beat',scaleDict:'ref',chordLab:'ref',tuner:'tuner',theory:'theory'};
 const groupOf=m=>MODE_GROUP[m]||'quiz';
 const groupLast={play:'rhythm',beat:'meter',ref:'chordLab',tuner:'tuner',theory:'theory'};
 function syncTabs(m){const g=groupOf(m);if(g!=='quiz')groupLast[g]=m;
@@ -1853,16 +2097,16 @@ function syncTabs(m){const g=groupOf(m);if(g!=='quiz')groupLast[g]=m;
   const grp=TAB_GROUPS.find(x=>x.g===g),st=$('subTabs');
   if(grp&&grp.subs){st.innerHTML=grp.subs.map(s=>'<div class="subtab'+(s[0]===m?' on':'')+'" data-m="'+s[0]+'">'+s[1]+'</div>').join('');show('subTabs',true);}
   else{st.innerHTML='';show('subTabs',false);}}
-function setMode(m){if(mode==='rhythm'&&m!=='rhythm')stopRhythm();if(mode==='meter'&&m!=='meter')mtStop();if(mode==='count'&&m!=='count')ctStop();
+function setMode(m){if(mode==='err'&&m!=='err'&&R._errSaved){R.perLine=R._errSaved.pl;R.lines=R._errSaved.ln;R._errSaved=null;syncMeas();R.measuresData=null;}if(mode==='rhythm'&&m!=='rhythm')stopRhythm();if(mode==='meter'&&m!=='meter')mtStop();if(mode==='count'&&m!=='count')ctStop();
   if(mode==='analyze'&&m!=='analyze'){if(loopOn)stopRhythm();R.measuresData=null;R._anLayout=null;R._seqFocus=false;R._seq=null;R._mod=null;R._modPlan=false;} // 분석 떠나면 정지·곡/레이아웃·시퀀스 리셋(지휘 설정은 그대로)
   mode=m;answered=false;
   if(QUIZKINDS.includes(m))quizMode=m;
   syncTabs(m);
   show('ansScore',false);
   const r=m==='rhythm',mt=m==='meter',ct=m==='count',an=m==='analyze',ref=(m==='scaleDict'||m==='chordLab'||m==='tuner'),th=m==='theory',quiz=!r&&!mt&&!ct&&!an&&!ref&&!th;
-  show('subSeg',quiz);show('rPanel',r);show('rCtrls',r);show('scorePanel',r||an);show('setPanel',quiz);show('anPanel',an);
-  show('mtPanel',mt);show('mtReadout',mt);show('mtPulseWrap',mt);show('mtCtrls',mt);show('ring',!mt&&!ct&&!ref&&!th);
-  show('ctPanel',ct);show('ctTimeWrap',ct);show('ctEditor',ct);show('ctCtrls',ct);show('refWrap',ref);show('theoryWrap',th);var _pp=document.getElementById('prompt');if(_pp)_pp.style.display=th?'none':'';var _sm=document.getElementById('scoremsg');if(_sm)_sm.style.display=th?'none':'';var _stgE=document.querySelector('.stage');if(_stgE)_stgE.classList.toggle('hide',th);if(th&&window.__thInit)window.__thInit();
+  show('subSeg',quiz&&m!=='err');show('rPanel',r);show('rCtrls',r);show('scorePanel',r||an);show('setPanel',quiz&&m!=='err');show('anPanel',an);
+  show('mtPanel',mt);show('mtReadout',mt);show('mtPulseWrap',mt);show('mtCtrls',mt);show('ring',!mt&&!ct&&!ref&&!th&&m!=='err');
+  show('ctPanel',ct);show('ctTimeWrap',ct);show('ctEditor',ct);show('ctCtrls',ct);show('refWrap',ref);show('theoryWrap',th);show('errScore',m==='err');show('errBar',m==='err');if(m==='err'){if(!R._errSaved){R._errSaved={pl:R.perLine,ln:R.lines};}R.perLine='4';R.lines='1';syncMeas();R.measuresData=null;errBarBuild();updateScore();newQuestion();}var _pp=document.getElementById('prompt');if(_pp)_pp.style.display=th?'none':'';var _sm=document.getElementById('scoremsg');if(_sm)_sm.style.display=th?'none':'';var _stgE=document.querySelector('.stage');if(_stgE)_stgE.classList.toggle('hide',th);if(th&&window.__thInit)window.__thInit();
   var _stg=document.querySelector('.stage');if(_stg)_stg.classList.toggle('ptop',r||an);
   if(ct){show('ssCard',false);show('choices',false);show('quizBar',false);show('score',false);show('ssBar1',false);show('ssBar2',false);show('ssInfo',false);
     ctRender();$('prompt').innerHTML='Beating Training';}
@@ -1876,7 +2120,7 @@ function setMode(m){if(mode==='rhythm'&&m!=='rhythm')stopRhythm();if(mode==='met
   else if(ref){show('ssCard',false);show('choices',false);show('quizBar',false);show('score',false);show('ssBar1',false);show('ssBar2',false);show('ssInfo',false);
     const sc=(m==='scaleDict');$('fScale').style.display=sc?'block':'none';$('fChord').style.display=m==='chordLab'?'block':'none';$('fTuner').style.display=m==='tuner'?'block':'none';
     $('prompt').innerHTML=sc?'Scale Dictionary':(m==='chordLab'?'Chord Lab':'Tuner');if(window.__refPoke)window.__refPoke(m);}
-  else{syncSubSeg();applySub();}}
+  else if(m==='err'){show('ssCard',false);show('ssBar1',false);show('ssBar2',false);show('ssInfo',false);show('choices',true);show('quizBar',true);show('score',true);show('setPanel',false);}else{syncSubSeg();applySub();}}
 
 /* ---------- 설정/리듬 UI ---------- */
 function seg(label,opts,active,cb){const row=document.createElement('div');row.className='row';row.innerHTML='<div class="lab">'+label+'</div>';
@@ -1886,6 +2130,7 @@ function multiSeg(label,opts,isOn,toggle){const row=document.createElement('div'
   const o=document.createElement('div');o.className='opts';opts.forEach(op=>{const b=document.createElement('div');b.className='opt'+(isOn(op)?' on':'');b.textContent=op;
     b.onclick=()=>{toggle(op);b.classList.toggle('on',isOn(op));};o.appendChild(b);});row.appendChild(o);return row;}
 function buildSettings(){const b=$('setBody');b.innerHTML='';
+  
   if(mode==='interval'){
     if(subMode.interval==='시창'){
       b.appendChild(seg('조',TONICS,TONICS[SS.iv.tonic],v=>{SS.iv.tonic=TONICS.indexOf(v);}));
