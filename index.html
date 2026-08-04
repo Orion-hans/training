@@ -1055,7 +1055,9 @@ function errBarSync(){
   bar.querySelectorAll('.ebseg .btn').forEach(b=>{
     b.classList.toggle('on',(b.getAttribute('data-v')||null)===(ERRCFG.force||null));});
 }
-function renderChoices(labels,values){const c=$('choices');c.innerHTML='';labels.forEach((lab,i)=>{const v=values?values[i]:lab;const d=document.createElement('div');d.className='choice';d.dataset.v=v;d.textContent=lab;d.onclick=()=>answer(v);c.appendChild(d);});}
+function renderChoices(labels,values){const c=$('choices');c.innerHTML='';
+  c.style.gridTemplateColumns='repeat('+(labels.length===4?4:(labels.length===2?2:3))+',1fr)';
+  c.style.fontSize=labels.length>=4?'':'';labels.forEach((lab,i)=>{const v=values?values[i]:lab;const d=document.createElement('div');d.className='choice';d.dataset.v=v;d.textContent=lab;d.onclick=()=>answer(v);c.appendChild(d);});}
 function updateScore(){const s=stats[mode]||{c:0,t:0,s:0};$('correctN').textContent=s.c;$('totalN').textContent=s.t;$('streakN').textContent=s.s;}
 
 /* ---------- 시창(Sight-singing): 음정·화음 ---------- */
@@ -2466,7 +2468,19 @@ cv.onclick=()=>{if(mode==='rhythm'||mode==='analyze')loopOn?stopRhythm():startRh
 
 /* ---------- 모드 ---------- */
 function newQuestion(){if(mode==='interval')newInterval();else if(mode==='chord')newChord();else if(mode==='counter')newCounter();else if(mode==='prog')newProg();else if(mode==='cadence')newCadence();else if(mode==='inversion')newInversion();else if(mode==='err')newErr();}
-function playQuestion(){if(mode==='interval')playInterval();else if(mode==='chord')playChord();else if(mode==='counter')playCounter();else if(mode==='prog')playProg();else if(mode==='cadence')playCadence();else if(mode==='inversion')playInversion();else if(mode==='err')playErr();}
+let qPlaying=false,qStopT=null;
+function markQPlay(sec){qPlaying=true;const b=$('play');if(b)b.textContent='■ 멈춤';
+  clearTimeout(qStopT);qStopT=setTimeout(function(){qPlaying=false;const bb=$('play');if(bb)bb.textContent='들어보기';},Math.max(600,(sec||3)*1000));}
+function stopQuestion(){qPlaying=false;clearTimeout(qStopT);
+  try{if(ctx)newBus();}catch(e){}
+  const b=$('play');if(b)b.textContent='들어보기';}
+function playQuestion(){markQPlay(qDur());if(mode==='interval')playInterval();else if(mode==='chord')playChord();else if(mode==='counter')playCounter();else if(mode==='prog')playProg();else if(mode==='cadence')playCadence();else if(mode==='inversion')playInversion();else if(mode==='err')playErr();}
+function qDur(){
+  if(mode==='err'){try{let s=0;R.measuresData.forEach(md=>{s+=md.q*((60/md.bpm)/unitQL(R.unit));});return s+0.6;}catch(e){return 12;}}
+  if(mode==='prog'||mode==='cadence')return 5;
+  if(mode==='counter')return 6;
+  return 3.2;
+}
 const show=(id,on)=>$(id).classList.toggle('hide',!on);
 function syncSubSeg(){$('kindSel').value=mode;const canSS=(mode==='interval'||mode==='chord');if(!canSS)subMode[mode]='청음';const sel=$('subSel');for(let i=0;i<sel.options.length;i++){if(sel.options[i].value==='시창')sel.options[i].disabled=!canSS;}sel.value=subMode[mode]||'청음';sel.style.display='';}
 function applySub(){const ss=subMode[mode]==='시창';
@@ -2601,7 +2615,7 @@ function syncTabs(m){const g=groupOf(m);if(g!=='quiz')groupLast[g]=m;
   const grp=TAB_GROUPS.find(x=>x.g===g),st=$('subTabs');
   if(grp&&grp.subs){st.innerHTML=grp.subs.map(s=>'<div class="subtab'+(s[0]===m?' on':'')+'" data-m="'+s[0]+'">'+s[1]+'</div>').join('');show('subTabs',true);}
   else{st.innerHTML='';show('subTabs',false);}}
-function setMode(m){if(mode==='err'&&m!=='err'&&R._errSaved){R.perLine=R._errSaved.pl;R.lines=R._errSaved.ln;R._errSaved=null;syncMeas();R.measuresData=null;}if(mode==='rhythm'&&m!=='rhythm')stopRhythm();if(mode==='meter'&&m!=='meter')mtStop();if(mode==='count'&&m!=='count')ctStop();
+function setMode(m){try{if(typeof stopQuestion==='function')stopQuestion();}catch(e){}if(mode==='err'&&m!=='err'&&R._errSaved){R.perLine=R._errSaved.pl;R.lines=R._errSaved.ln;R._errSaved=null;syncMeas();R.measuresData=null;}if(mode==='rhythm'&&m!=='rhythm')stopRhythm();if(mode==='meter'&&m!=='meter')mtStop();if(mode==='count'&&m!=='count')ctStop();
   if(mode==='analyze'&&m!=='analyze'){if(loopOn)stopRhythm();R.measuresData=null;R._anLayout=null;R._seqFocus=false;R._seq=null;R._mod=null;R._modPlan=false;} // 분석 떠나면 정지·곡/레이아웃·시퀀스 리셋(지휘 설정은 그대로)
   mode=m;answered=false;
   if(QUIZKINDS.includes(m))quizMode=m;
@@ -2940,8 +2954,8 @@ window.__thInit=function(){ if(!window.__thDone){ window.__thDone=true; window.t
 $('subTabs').onclick=e=>{const t=e.target.closest('.subtab');if(t)setMode(t.dataset.m);};
 $('mtPlayA').onclick=()=>mtToggle('A');$('mtPlayB').onclick=()=>mtToggle('B');$('mtPlayT').onclick=()=>mtToggle('trans');
 $('ctPlay').onclick=()=>ctToggle();$('ctAdd').onclick=()=>{TR.meas.push(ctPreset([2,2,2,2]));ctRender();ctRestart();};$('ctReset').onclick=()=>{TR.meas=[ctPreset([2,2,2,2])];TR.sel=null;ctRender();ctRestart();};
-$('play').onclick=()=>playQuestion();
-$('next').onclick=()=>{newQuestion();setTimeout(playQuestion,160);};
+$('play').onclick=()=>{if(qPlaying){stopQuestion();}else{playQuestion();}};
+$('next').onclick=()=>{stopQuestion();newQuestion();setTimeout(playQuestion,160);};
 $('setHead').onclick=()=>$('setPanel').classList.toggle('closed');
 $('rHead').onclick=()=>$('rPanel').classList.toggle('closed');
 $('scoreHead').onclick=()=>$('scorePanel').classList.toggle('closed');
