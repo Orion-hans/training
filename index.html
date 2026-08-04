@@ -162,7 +162,9 @@ input[type=range]{flex:1;accent-color:var(--mint)}
 .etabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
 .etab{padding:5px 9px;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;font-size:.7rem;font-weight:700;cursor:pointer}
 .etab.on{background:var(--mint);color:#0b0f12;border-color:var(--mint)}
-.esel{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 7px;font-size:.75rem}
+.ewords{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.eword{padding:5px 11px;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;font-size:.74rem;font-weight:700;cursor:pointer}
+.eword.on{background:var(--mint);color:#0b0f12;border-color:var(--mint)}
 .einfo{font-size:.72rem;color:var(--muted);margin-top:5px}
 .einfo b{color:var(--mint)}
 .lh-note{margin-top:9px;font-size:.74rem;line-height:1.6;color:var(--muted)}
@@ -332,7 +334,7 @@ input[type=range]{flex:1;accent-color:var(--mint)}
     <div id="ssCard" class="hide"><div class="scoremsg">[생성]을 눌러 시창 멜로디를 만드세요</div></div>
     <div class="prompt" id="prompt">들어보기를 눌러 시작</div>
   <div id="handsWrap" class="hide"><div class="solo-bar"><button class="solo-btn" id="soloBtn">▶ 음악 없이 연습</button><span class="solo-hint" id="soloHint">악보 재생 없이 손만 돌려요</span></div><div class="hands"><div class="hand-l"><div class="hand-cap">왼손</div><div class="lh-track"><div class="lh-sig"><div class="sigdot" id="lhSig"><span id="lhSigN"></span></div><div class="sigtxt" id="lhSigT">큐</div></div><div class="lh-gauge"><div class="lh-fill" id="lhFill"></div><div class="ltgt hide" id="lhTgt"></div><div class="lmark" id="lhMark"></div><div class="cutdot hide" id="lhCut2"></div><div class="linlab" id="lhIn"></div></div></div></div><div class="hand-r"><div class="hand-cap">오른손</div><div id="btSvgWrap"></div><div class="bt-beatn" id="btBeatN">–</div><div class="ax-bar"><span>가로축</span><select id="axL"></select><button class="ax-auto" id="axAuto">자동</button></div></div></div></div>
-  <div id="lhWrap" class="hide"><button class="lh-toggle" id="lhToggle">＋ 왼손 분리 연습</button><div class="lh-box" id="lhBox"><div class="lh-head">왼손 · <b id="lhName">중립 유지</b></div><div class="lh-main"><div class="lh-right"><div class="lh-exs"><button class="lhx on" data-x="hold">정지(중립)</button><button class="lhx" data-x="cresc">크레셴도</button><button class="lhx" data-x="dim">디크레셴도</button><button class="lhx" data-x="cue">큐</button><button class="lhx" data-x="sus">지속음</button><button class="lhx" data-x="score">악보 따라</button><button class="lhx" data-x="emo">감정 따라</button></div><div class="lh-opt" id="lhOpt"></div></div></div><div class="lh-note" id="lhNote">오른손은 박 패턴 유지, 왼손은 위 과제를 동시에 — 따라하기(미러링) 없이.</div></div>
+  <div id="lhWrap" class="hide"><button class="lh-toggle" id="lhToggle">＋ 왼손 분리 연습</button><div class="lh-box" id="lhBox"><div class="lh-head">왼손 · <b id="lhName">중립 유지</b></div><div class="lh-main"><div class="lh-right"><div class="lh-exs"><button class="lhx on" data-x="hold">정지(중립)</button><button class="lhx" data-x="cresc">크레셴도</button><button class="lhx" data-x="dim">디크레셴도</button><button class="lhx" data-x="cue">큐</button><button class="lhx" data-x="sus">지속음</button><button class="lhx" data-x="score">악보 따라</button><button class="lhx" data-x="emo">정서어</button></div><div class="lh-opt" id="lhOpt"></div></div></div><div class="lh-note" id="lhNote">오른손은 박 패턴 유지, 왼손은 위 과제를 동시에 — 따라하기(미러링) 없이.</div></div>
   </div>
   <div class="panel hide" id="scorePanel">
     <div class="ph" id="scoreHead"><span>악보 미리보기 <span style="color:var(--muted);font-weight:400;font-size:12px">· 멜로디 + 코드</span></span><span class="ch">▾</span></div>
@@ -2065,15 +2067,18 @@ function axSync(){
 }
 function shapeRefresh(){const m=btBeatsOf(R.num||4,R.den||4);_shapeN=0;axSync();shapeUpdate(m-1,m);}
 function shapeUpdate(beatPos,n,ratio){
+  var _sz=(typeof LHT!=='undefined'&&LHT.ex==='emo'&&typeof lexStyle==='function')?lexStyle(LEXSEL.cur).size:1;
   shapeRender(n);
   const rr=Math.max(0.7,Math.min(1.7,ratio||1));      /* 박 길이 비율(2묶음 vs 3묶음) */
   const pts=btPoints(n), bi=Math.min(n-1,Math.max(0,Math.floor(beatPos))), fr=beatPos-Math.floor(beatPos);
   const p0=pts[bi],p1=pts[(bi+1)%n];
   /* 중력·관성: 익투스 직후 튀어 오르고(감속), 다음 익투스로 떨어지며 가속 */
   const isLast=(bi===n-1);                          /* 마지막 박(업) — 제자리에서 위로 툭 */
-  const te=Math.pow(fr,isLast?1.42:1.28);           /* 도착 가속(마지막 박은 더 급하게 낙하) */
-  const rise=(bi===0?34:(isLast?48:22))*Math.pow(rr,1.35);  /* 체공시간이 길수록 높이 뜀 */
-  const arc=rise*Math.sin(Math.PI*Math.pow(fr,isLast?0.62:0.85));
+  const LS=(typeof LHT!=='undefined'&&LHT.ex==='emo'&&typeof lexStyle==='function')?lexStyle(LEXSEL.cur):null;
+  const ff=LS?Math.min(1,fr/LS.hold):fr;            /* 긴장이 높으면 박 사이에서 정지(세코) */
+  const te=Math.pow(ff,(isLast?1.42:1.28)*(LS?(LS.te/1.30):1));
+  const rise=(bi===0?34:(isLast?48:22))*Math.pow(rr,1.35)*(LS?LS.arc:1);
+  const arc=rise*Math.sin(Math.PI*Math.pow(ff,isLast?0.62:0.85));
   const x=p0[0]+(p1[0]-p0[0])*te;
   const y=p0[1]+(p1[1]-p0[1])*te-arc;
   const d=document.getElementById('btDot');
@@ -2179,17 +2184,116 @@ function emoTarget(bp,n,measIdx,barPos){
   return {v:0.45+0.05*br,tag:'중립'};
 }
 function emoBuild(){
-  var g=$('emoTabs'),s=$('emoSel'); if(!g||!s)return;
-  var gh='';EGROUPS.forEach(function(x){gh+='<button class="etab'+(EMOS.grp===x.id?' on':'')+'" data-g="'+x.id+'">'+x.name+'</button>';});
+  var g=$('emoTabs'),s=$('emoWords'); if(!g||!s)return;
+  var gh='';LEXFAMS.forEach(function(f){gh+='<button class="etab'+(LEXSEL.fam===f?' on':'')+'" data-g="'+f+'">'+f+'</button>';});
   g.innerHTML=gh;
-  var eh='';EEMO.forEach(function(x,i){if(x.g===EMOS.grp)eh+='<option value="'+i+'"'+(x.n===EMOS.cur.n?' selected':'')+'>'+x.n+'</option>';});
+  var eh='';LEXWORDS.forEach(function(w,i){if(w.f===LEXSEL.fam)eh+='<button class="eword'+(w.n===LEXSEL.cur.n?' on':'')+'" data-i="'+i+'">'+w.n+'</button>';});
   s.innerHTML=eh;
   var inf=$('emoInfo');
-  if(inf)inf.innerHTML='<b>'+EMOS.cur.n+'</b> · '+EMOS.cur.cl+'·'+EMOS.cur.lk+' · 왼손 <b>'+EMOS.cur.lh+'</b>';
+  if(inf)inf.innerHTML='<b>'+LEXSEL.cur.n+'</b> — '+LEXSEL.cur.g+'<br>'+lexShapeText(LEXSEL.cur);
   if(!g._b){g._b=1;g.addEventListener('click',function(ev){var b=ev.target.closest('.etab');if(!b)return;
-    EMOS.grp=b.getAttribute('data-g');var l=EEMO.filter(function(x){return x.g===EMOS.grp;});if(l.length)EMOS.cur=l[0];emoBuild();lhSync();});}
-  if(!s._b){s._b=1;s.addEventListener('change',function(){EMOS.cur=EEMO[+this.value];emoBuild();lhSync();});}
+    LEXSEL.fam=b.getAttribute('data-g');var l=LEXWORDS.filter(function(w){return w.f===LEXSEL.fam;});if(l.length)LEXSEL.cur=l[0];emoBuild();lhSync();});}
+  if(!s._b){s._b=1;s.addEventListener('click',function(ev){var b=ev.target.closest('.eword');if(!b)return;
+    LEXSEL.cur=LEXWORDS[+b.getAttribute('data-i')];emoBuild();lhSync();});}
 }
+var LEXAX = {
+  b:{name:'밝기', stops:['어둠','중간','밝음']},
+  t:{name:'긴장', stops:['이완','중간','긴장']},
+  e:{name:'에너지', stops:['고요','중간','격동']}
+};
+var LEXMD = ['없음','조금','많이'];
+
+var LEXW = [
+  ['애잔','슬픔','삭이는 쪽',0,1,0,1,'뒤무겁','무르게'],
+  ['애절','슬픔','터뜨리는 쪽',0,2,1,2,'산모양','곧게'],
+  ['처연','슬픔','체념하는 쪽',0,0,0,0,'뒤무겁','무르게'],
+  ['침울','슬픔','가라앉는 쪽',0,0,0,0,'평평','무르게'],
+  ['울분','슬픔','쏟아내는 쪽',0,1,2,1,'앞무겁','찌르게'],
+
+  ['경쾌','흥','가볍게 튀는 쪽',2,0,1,0,'평평','곧게'],
+  ['흥겹','흥','무르익어 몸이 실리는 쪽',2,0,2,2,'산모양','곧게'],
+  ['화사','흥','환하게 펼쳐지는 쪽',2,1,1,1,'앞무겁','곧게'],
+  ['벅참','흥','차올라 넘치는 쪽',2,2,2,1,'뒤무겁','무르게'],
+
+  ['잔잔','고요','표면이 고른 쪽',1,0,0,0,'평평','무르게'],
+  ['그윽','고요','안으로 깊은 쪽',1,1,0,1,'뒤무겁','무르게'],
+  ['청아','고요','맑게 트인 쪽',2,1,0,0,'앞무겁','곧게'],
+  ['담박','고요','비우고 덜어낸 쪽',1,0,0,0,'평평','곧게'],
+
+  ['초조','긴장','잘게 떨리는 쪽',0,2,0,1,'평평','찌르게'],
+  ['위태','긴장','멈춰서 조여 있는 쪽',1,2,0,0,'뒤무겁','곧게'],
+  ['비장','긴장','버티며 나아가는 쪽',0,2,2,1,'앞무겁','곧게'],
+  ['격정','긴장','밖으로 쏟아내는 쪽',0,2,2,2,'산모양','찌르게'],
+  ['질주','긴장','밀고 나가는 쪽',1,2,2,0,'뒤무겁','찌르게'],
+
+  ['장엄','장중','크고 무겁게 서는 쪽',1,1,2,1,'앞무겁','곧게'],
+  ['유장','장중','느리게 길게 흐르는 쪽',1,0,1,1,'평평','무르게'],
+  ['의연','장중','흔들림 없이 버티는 쪽',1,1,1,0,'평평','곧게'],
+  ['근엄','장중','엄하고 단정한 쪽',0,2,1,0,'앞무겁','곧게'],
+
+  ['간절','애틋','닿으려 뻗는 쪽',2,2,1,2,'뒤무겁','곧게'],
+  ['아련','애틋','남아 맴도는 쪽',1,1,0,1,'산모양','무르게'],
+  ['다정','애틋','따뜻하게 감싸는 쪽',2,0,0,1,'평평','무르게'],
+  ['부유','애틋','대상 없이 떠 있는 쪽',1,1,0,0,'평평','무르게'],
+
+  ['몽롱','신비','윤곽이 풀린 쪽',1,0,0,0,'산모양','무르게'],
+  ['서늘','신비','온도가 내려간 쪽',0,1,0,0,'평평','곧게'],
+  ['영묘','신비','신령스럽게 뜬 쪽',1,1,0,0,'뒤무겁','무르게'],
+  ['기이','신비','낯설고 어긋난 쪽',0,2,1,2,'평평','찌르게'],
+
+  ['익살','해학','대놓고 웃기는 쪽',2,0,1,1,'앞무겁','찌르게'],
+  ['능청','해학','시치미 떼는 쪽',2,1,1,2,'뒤무겁','무르게'],
+  ['앙증','해학','작고 귀여운 쪽',2,0,0,0,'앞무겁','곧게'],
+  ['짓궂','해학','건드리고 놀리는 쪽',2,1,1,1,'앞무겁','찌르게']
+];
+var LEXWORDS=LEXW.map(function(r){return {n:r[0],f:r[1],g:r[2],b:r[3],t:r[4],e:r[5],m:r[6],c:r[7],a:r[8]};});
+var LEXFAMS=['슬픔','흥','고요','긴장','장중','애틋','신비','해학'];
+var LEXSEL={fam:'슬픔', cur:LEXWORDS[0]};
+/* 접촉(a) → 오른손 명료도 · 긴장(t) → 연결 · 에너지(e) → 크기 */
+function lexStyle(w){
+  w=w||LEXSEL.cur;
+  var act=(w.a==='찌르게'), soft=(w.a==='무르게');
+  return {
+    te: act?1.60:(soft?1.12:1.36),          /* 익투스 도착 가속 */
+    arc: act?0.72:(soft?1.28:1.00),         /* 반동 크기 */
+    hold: (w.t===2)?0.68:(w.t===1?0.85:1.0),/* 세코성: 긴장 높으면 박 사이 끊음 */
+    size: [0.86,1.0,1.20][w.e],             /* 에너지 → 도형 크기 */
+    squash: act?1:(soft?0.35:0.7),
+    label: w.a+' · '+(w.t===2?'세코':w.t===1?'중간':'레가토')
+  };
+}
+/* 프레이즈 모양(c) → 왼손 셈여림 곡선 */
+function lexLevel(w,p){
+  w=w||LEXSEL.cur;
+  var base=0.24+0.13*w.e+0.07*w.b, amp=0.14+0.11*w.e;
+  var v;
+  if(w.c==='앞무겁')      v=base+amp*(1-p)*1.6;
+  else if(w.c==='뒤무겁') v=base+amp*p*1.6;
+  else if(w.c==='산모양') v=base+amp*Math.sin(Math.PI*p)*1.7;
+  else                    v=base+amp*0.35;              /* 평평 */
+  return Math.max(0.08,Math.min(0.96,v));
+}
+/* 프레이즈 모양 → 큐 자리(강조 지점) */
+function lexCueBeat(w,n){
+  w=w||LEXSEL.cur;
+  if(w.c==='앞무겁')return 0;
+  if(w.c==='뒤무겁')return n-1;
+  if(w.c==='산모양')return Math.max(0,Math.round(n/2)-1);
+  return -1;                                            /* 평평 = 큐 없음 */
+}
+function lexDesc(w){
+  w=w||LEXSEL.cur;
+  return w.n+' — '+w.f+' 계열, '+w.g+'. 밝기 '+LEXAX.b.stops[w.b]+' · 긴장 '+LEXAX.t.stops[w.t]
+   +' · 에너지 '+LEXAX.e.stops[w.e]+' · 꾸밈 '+LEXMD[w.m]+'. 프레이즈 '+w.c+' · 접촉 '+w.a+'.';
+}
+function lexShapeText(w){
+  w=w||LEXSEL.cur;
+  var C={'앞무겁':'첫 박에 무게를 싣고 뒤로 갈수록 덜어요','뒤무겁':'뒤로 갈수록 실어 마디 끝에서 가장 큽니다',
+         '산모양':'가운데가 정점 — 올렸다 내립니다','평평':'처음부터 끝까지 같은 크기로 유지해요'};
+  var A={'무르게':'점을 흐리고 미끄러지듯 — 파시브','곧게':'점은 또렷하되 과하지 않게','찌르게':'콕 찍어 소리를 끌어냅니다 — 악티브'};
+  return C[w.c]+'. '+A[w.a]+'.';
+}
+
 /* ---------- 왼손 · 악보 따라가기 ---------- */
 function lhFromScore(measIdx,beatPos,meter){
   const md=R.measuresData&&R.measuresData[measIdx];
@@ -2210,11 +2314,11 @@ function lhFromScore(measIdx,beatPos,meter){
 }
 /* ---------- 왼손 분리 연습 ---------- */
 const LHT={on:false,ex:'hold',cue:-1,cBars:4,cFrom:1,sus:4,susFrom:0,cut:true};
-const LHNAME={hold:'중립 유지 — 개입하지 않기',cresc:'크레셴도 — 정한 마디에 걸쳐 키우기',dim:'디크레셴도 — 정한 마디에 걸쳐 줄이기',cue:'큐 — 정한 박에 진입 신호',sus:'지속음 — 음가만큼 유지하고 컷',score:'악보 따라 — 셈여림·페르마타를 왼손으로',emo:'감정 따라 — 감정의 왼손 지시를 그대로'};
+const LHNAME={hold:'중립 유지 — 개입하지 않기',cresc:'크레셴도 — 정한 마디에 걸쳐 키우기',dim:'디크레셴도 — 정한 마디에 걸쳐 줄이기',cue:'큐 — 정한 박에 진입 신호',sus:'지속음 — 음가만큼 유지하고 컷',score:'악보 따라 — 셈여림·페르마타를 왼손으로',emo:'정서어 — 프레이즈 모양과 접촉을 손으로'};
 const SUSVAL=[['4','온음표'],['3','점2분음표'],['2','2분음표'],['1.5','점4분음표'],['1','4분음표'],['0.5','8분음표']];
 function lhOptHTML(){
   const m=Math.max(1,btBeatsOf(R.num||4,R.den||4));
-  if(LHT.ex==='emo'){return '<div id="emoTabs" class="etabs"></div><select id="emoSel" class="esel"></select><div id="emoInfo" class="einfo"></div>';}
+  if(LHT.ex==='emo'){return '<div id="emoTabs" class="etabs"></div><div id="emoWords" class="ewords"></div><div id="emoInfo" class="einfo"></div>';}
   if(LHT.ex==='cue'){
     let o='<label>큐 박</label><select id="lhCue">';
     for(let i=0;i<m;i++)o+='<option value="'+i+'"'+(LHT.cue===i?' selected':'')+'>'+(i+1)+'박</option>';
@@ -2256,7 +2360,7 @@ function lhSync(){
     dim:'디크레셴도 · '+LHT.cBars+'마디@'+LHT.cFrom,
     cue:'큐 · '+(LHT.cue<0?'마지막':(Math.min(LHT.cue,m2-1)+1))+'박',
     sus:'지속음 · '+(Math.min(LHT.susFrom,m2-1)+1)+'박~'+(SUSN[LHT.sus]||LHT.sus)+(LHT.cut?' +컷':''),
-    score:'악보 따라',emo:'감정 따라 · '+EMOS.cur.n};
+    score:'악보 따라',emo:'정서어 · '+LEXSEL.cur.n};
   document.querySelectorAll('.lhx').forEach(function(b){const k=b.getAttribute('data-x');
     b.classList.toggle('on',k===LHT.ex);
     b.textContent=LAB[k];});   /* 선택 여부와 무관하게 설정값을 항상 표시 */
@@ -2296,10 +2400,11 @@ function lhFrame(measIdx,beatPos,meter){
       tag=(LHT.ex==='cresc'?'↑ ':'↓ ')+(LHT.cBars-done).toFixed(1)+'마디';}
   }
   else if(LHT.ex==='emo'){
-    const E=emoTarget(beatPos,meter,measIdx,nowQ/qTot);
-    lvl=E.v;tag=(E.v>0.66?'크게':E.v<0.36?'작게':'중간');
-    if(/큐|지시/.test(EMOS.cur.lh))cueQ=bq(meter-1);
-    if(/급정지|정지/.test(EMOS.cur.lh)&&bi===meter-1&&fr>0.55){susProg=1;cutNow=true;tag='컷';}
+    const w=LEXSEL.cur,pp=nowQ/qTot;
+    lvl=lexLevel(w,pp);
+    tag=w.n+' · '+w.c;
+    const cb=lexCueBeat(w,meter);
+    if(cb>=0)cueQ=bq(cb);
   }
   else if(LHT.ex==='score'){
     const s=lhFromScore(measIdx,beatPos,meter);
