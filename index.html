@@ -2033,9 +2033,10 @@ function btPoints(m){
 /* 박자표 → 지휘 박 수(3분박이면 점음표 단위로 묶음) */
 function btGrp(){                                  /* 현재 선택된 박 묶음 → 배열 */
   try{
-    if(R._curGroup&&R._curGroup.length)return R._curGroup.slice();
     if(R.group&&R.group!=='auto'&&R.group!=='랜덤'){const g=R.group.split('+').map(Number);
-      if(g.every(function(x){return x>0;}))return g;}
+      if(g.length&&g.every(function(x){return x>0;}))return g;}
+    const md=R.measuresData&&R.measuresData[0];
+    if(md&&md.groups&&md.groups.length&&md.num===R.num&&md.den===R.den)return md.groups.slice();
   }catch(_e){}
   return null;
 }
@@ -2291,7 +2292,7 @@ function lhFromScore(measIdx,beatPos,meter){
   return {v:0.45,flash:false,cut:false,tag:'중립'};
 }
 /* ---------- 왼손 분리 연습 ---------- */
-const LHT={on:false,ex:'hold',cue:-1,cBars:4,cFrom:1,sus:4,susFrom:0,cut:true};
+const LHT={on:false,ex:'hold',cue:0,cBars:1,cFrom:1,sus:2,susFrom:0,cut:true};
 const LHNAME={hold:'중립 유지 — 개입하지 않기',cresc:'크레셴도 — 정한 마디에 걸쳐 키우기',dim:'디크레셴도 — 정한 마디에 걸쳐 줄이기',cue:'큐 — 정한 박에 진입 신호',sus:'지속음 — 음가만큼 유지하고 컷',score:'악보 따라 — 셈여림·페르마타를 왼손으로',emo:'정서어 — 프레이즈 모양과 접촉을 손으로'};
 const SUSVAL=[['4','온음표'],['3','점2분음표'],['2','2분음표'],['1.5','점4분음표'],['1','4분음표'],['0.5','8분음표']];
 function lhOptHTML(){
@@ -2305,7 +2306,7 @@ function lhOptHTML(){
   }
   if(LHT.ex==='cresc'||LHT.ex==='dim'){
     let o='<label>길이</label><select id="lhCB">';
-    [2,4,8].forEach(function(x){o+='<option value="'+x+'"'+(LHT.cBars===x?' selected':'')+'>'+x+'마디</option>';});
+    [1,2,4,8].forEach(function(x){o+='<option value="'+x+'"'+(LHT.cBars===x?' selected':'')+'>'+x+'마디</option>';});
     o+='</select><label>시작</label><select id="lhCF">';
     for(let i=1;i<=Math.max(1,R.measures||8);i++)o+='<option value="'+i+'"'+(LHT.cFrom===i?' selected':'')+'>'+i+'마디</option>';
     o+='</select>';
@@ -2659,7 +2660,7 @@ function buildRhythmUI(){const refresh=()=>{if(rPlaying){stopRhythm();startRhyth
   fillSel($('rUnit'),TEMPO_UNITS.map(id=>[id,UNITS.find(u=>u[0]===id)[1]]),R.unit,v=>{R.unit=v;renderScore();if(rPlaying){stopRhythm();startRhythm();}});
   const go=groupOptions(R.num,R.den);show('rGroupRow',!!go);
   if(go){const def=meterInfo(R.num,R.den).groups.join('+');const gopts=[['auto','자동 ('+def+')']].concat(go.map(g=>[g.join('+'),g.join('+')])).concat([['랜덤','랜덤']]);if(!gopts.some(o=>o[0]===R.group))R.group='auto';
-    fillSel($('rGroup'),gopts,R.group,v=>{R.group=v;genArrangement();refresh();});}
+    fillSel($('rGroup'),gopts,R.group,v=>{R.group=v;genArrangement();refresh();if(typeof shapeRefresh==='function'&&mode==='rhythm')try{shapeRefresh();}catch(_e){}});}
   fillSel($('rKey'),[['random','🎲 랜덤 (변조)']].concat(KEYS.map(k=>[k.v,k.n])),R.keySel,v=>{R.keySel=v;R._curKey=null;genArrangement();refresh();});
   fillSel($('rPerLine'),[['1','1마디'],['2','2마디'],['3','3마디'],['4','4마디']],R.perLine,v=>{R.perLine=v;syncMeas();genArrangement();refresh();});
   fillSel($('rLines'),[['1','1줄'],['2','2줄'],['3','3줄'],['4','4줄']],R.lines,v=>{R.lines=v;syncMeas();genArrangement();refresh();});
