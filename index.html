@@ -2011,11 +2011,17 @@ function exportMIDI(){if(!R.measuresData||R.measuresData.length!==R.measures)gen
 /* ---------- 비팅 도형(좌/우 배분) ---------- */
 const BTPAT={2:{L:0,R:0},3:{L:0,R:1},4:{L:1,R:1},5:{L:1,R:2},6:{L:2,R:2},7:{L:2,R:3},8:{L:3,R:3},9:{L:3,R:4},12:{L:5,R:5}};
 const SHAPE={L:null};
+function btFixed(m){ return (m<=4); }               /* 3·4박은 배분이 하나뿐 */
 function btSplit(m){const mid=Math.max(0,m-2);
-  if(SHAPE.L!=null){const L=Math.max(0,Math.min(mid,SHAPE.L));return {L:L,R:mid-L};}
-  const p=BTPAT[m];if(p)return p;const L=Math.floor(mid/2);return {L:L,R:mid-L};}
+  if(m<=2)return {L:0,R:0};
+  if(m===3)return {L:0,R:1};                        /* 2번은 항상 오른쪽 */
+  if(m===4)return {L:1,R:1};                        /* 2번 왼쪽 · 3번 오른쪽 */
+  const lo=1,hi=mid-1;                              /* 5박 이상은 양쪽에 최소 1 */
+  if(SHAPE.L!=null){const L=Math.max(lo,Math.min(hi,SHAPE.L));return {L:L,R:mid-L};}
+  const p=BTPAT[m];if(p)return {L:Math.max(lo,Math.min(hi,p.L)),R:mid-Math.max(lo,Math.min(hi,p.L))};
+  const L=Math.max(lo,Math.min(hi,Math.floor(mid/2)));return {L:L,R:mid-L};}
 function btPoints(m){
-  const sp=btSplit(m),L=sp.L,R=sp.R,CX=150,TOP=74,BOT=182,LX=54,RX=246;
+  const sp=btSplit(m),L=sp.L,R=sp.R,CX=150,TOP=74,BOT=168,LX=54,RX=246;
   const pts=[[CX,BOT]];
   for(let i=0;i<L;i++){const s=(L===1)?1:(i/(L-1)), t=(L===1)?1:(0.38+0.62*s);   /* 안쪽 → 바깥쪽 */
     pts.push([CX-(CX-LX)*t, BOT-(BOT-TOP)*(0.18+0.30*s)]);}
@@ -2025,14 +2031,22 @@ function btPoints(m){
   return pts;
 }
 /* 박자표 → 지휘 박 수(3분박이면 점음표 단위로 묶음) */
+function btGrp(){                                  /* 현재 선택된 박 묶음 → 배열 */
+  try{
+    if(R._curGroup&&R._curGroup.length)return R._curGroup.slice();
+    if(R.group&&R.group!=='auto'&&R.group!=='랜덤'){const g=R.group.split('+').map(Number);
+      if(g.every(function(x){return x>0;}))return g;}
+  }catch(_e){}
+  return null;
+}
 function btBeatsOf(num,den){
-  try{const mi=meterInfo(num,den,null);if(mi&&mi.pulse&&mi.pulse.length)return mi.pulse.length;}catch(_e){}
+  try{const mi=meterInfo(num,den,btGrp());if(mi&&mi.pulse&&mi.pulse.length)return mi.pulse.length;}catch(_e){}
   if(den===8){ if(num%3===0&&num>=6)return num/3; return num; }
   return num;
 }
 /* 박 묶음 길이(4분음표 단위) — 2묶음/3묶음의 길이 차이를 반영 */
 function btPulses(num,den){
-  try{const mi=meterInfo(num,den,null);if(mi&&mi.pulse&&mi.pulse.length)return {P:mi.pulse,q:mi.q,g:mi.groups};}catch(_e){}
+  try{const mi=meterInfo(num,den,btGrp());if(mi&&mi.pulse&&mi.pulse.length)return {P:mi.pulse,q:mi.q,g:mi.groups};}catch(_e){}
   const q=num*(4/den),n=btBeatsOf(num,den),P=[];for(let i=0;i<n;i++)P.push(i*q/n);
   return {P:P,q:q,g:null};
 }
@@ -2055,10 +2069,10 @@ function shapeRender(n){
 function axSync(){
   const sel=$('axL'); if(!sel)return;
   const m=btBeatsOf(R.num||4,R.den||4), mid=Math.max(0,m-2);
-  const bar=sel.closest('.ax-bar'); if(bar)bar.style.display=(mid<1)?'none':'flex';
-  if(mid<1){sel.innerHTML='';return;}
+  const bar=sel.closest('.ax-bar'); if(bar)bar.style.display=btFixed(m)?'none':'flex';
+  if(btFixed(m)){sel.innerHTML='';return;}
   const cur=(SHAPE.L!=null)?Math.min(SHAPE.L,mid):btSplit(m).L;
-  const lo=(mid>=2)?1:0, hi=(mid>=2)?mid-1:mid;
+  const lo=1, hi=mid-1;
   const cur2=Math.max(lo,Math.min(hi,cur)); if(cur2!==cur)SHAPE.L=cur2;
   let o='';for(let i=lo;i<=hi;i++)o+='<option value="'+i+'"'+(i===cur2?' selected':'')+'>왼쪽 '+i+' · 오른쪽 '+(mid-i)+'</option>';
   sel.innerHTML=o;
