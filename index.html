@@ -103,6 +103,69 @@ input[type=range]{flex:1;accent-color:var(--mint)}
 .val{width:54px;text-align:right;color:var(--text);font-size:0.8125rem;font-variant-numeric:tabular-nums;font-family:"Space Grotesk",sans-serif}
 #scoreCard{background:#f7f5ef;border-radius:12px;margin-top:10px;padding:6px 4px;overflow-x:auto;min-height:60px}
 #errBar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:2px 0 8px}#errBar.hide{display:none}.ebSel{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:.45em .6em;font-size:.85rem;font-weight:600}.ebSeg{display:flex;gap:4px}.ebSeg button{background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.4em .8em;font-size:.78rem;font-weight:600;cursor:pointer}.ebSeg button.on{background:var(--mint);color:#10231d;border-color:var(--mint);font-weight:800}
+#handsWrap{margin:6px auto 0;max-width:min(96vw,560px)}
+.solo-bar{display:flex;gap:9px;align-items:center;justify-content:center;margin-bottom:8px;flex-wrap:wrap}
+.solo-btn{padding:7px 15px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;font-size:.8rem;font-weight:700;cursor:pointer}
+.solo-btn.on{background:var(--mint);color:#0b0f12;border-color:var(--mint)}
+.solo-hint{font-size:.72rem;color:var(--muted)}
+.ax-bar{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:6px;font-size:.72rem;color:var(--muted)}
+.ax-bar select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:.72rem}
+.ax-auto{background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:.7rem;font-weight:700;cursor:pointer}
+
+.hands{display:flex;gap:14px;align-items:stretch;justify-content:center}
+.hand-l{flex:0 0 78px;display:flex;flex-direction:column;align-items:center}
+.hand-r{flex:1;max-width:300px;display:flex;flex-direction:column;justify-content:center}
+.hand-cap{font-size:.72rem;color:var(--muted);margin-bottom:5px;letter-spacing:.08em;text-align:center;width:100%}
+.hand-l .lh-track{flex:none;position:relative;width:64px;height:230px;background:var(--bg);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;align-items:flex-end}
+#handsWrap svg{width:100%;display:block}
+#shapeWrap{margin:6px auto 0;max-width:min(92vw,320px)}
+#shapeWrap svg{width:100%;display:block}
+.bt-beatn{text-align:center;font-size:.8rem;color:var(--muted);margin-top:2px}
+.bt-beatn b{color:var(--mint);font-size:1.15rem}
+#lhWrap{margin:10px auto 0;max-width:min(96vw,560px)}
+.lh-toggle{width:100%;padding:9px;border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer}
+.lh-box{display:none;margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.lh-box.on{display:block}
+.lh-head{font-size:.85rem;color:var(--muted);margin-bottom:9px}
+.lh-head b{color:var(--mint)}
+.lh-main{display:flex;gap:12px;align-items:stretch}
+.lh-track{position:relative;flex:0 0 46px;height:150px;background:var(--bg);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;align-items:flex-end}
+.lh-fill{z-index:1;align-self:flex-end;width:100%;background:linear-gradient(180deg,var(--mint),#2f7f6c);height:8%;transition:height .06s linear}
+.lh-fill.flash{background:#f6d79a}
+.lh-sig{position:absolute;top:0;left:0;right:0;height:34%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-bottom:1px solid rgba(255,255,255,.14);z-index:5}
+.sigdot{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);border-radius:50%;border:2px solid rgba(255,255,255,.25);background:transparent;transition:transform .08s,background .08s,border-color .08s}
+.sigdot.prep{border-color:#f6d79a;border-style:dashed;color:#f6d79a}
+.sigdot.cue{background:#f6d79a;border-color:#f6d79a;color:#0b0f12;transform:scale(1.3)}
+.sigdot.cut{background:#ff8f7a;border-color:#ff8f7a;transform:scale(1.18)}
+.sigtxt{font-size:9.5px;font-weight:800;color:var(--muted);white-space:nowrap;letter-spacing:.02em}
+.lh-gauge{position:absolute;bottom:0;left:0;right:0;height:66%;overflow:hidden;display:flex;align-items:flex-end}
+.ltgt{position:absolute;left:2px;right:2px;height:3px;border-radius:2px;background:#f6d79a;bottom:0%;transition:bottom .08s linear;z-index:3;box-shadow:0 0 6px rgba(246,215,154,.5)}
+.cutdot{position:absolute;left:50%;top:4px;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;background:#ff8f7a;z-index:4;animation:cutblink .28s steps(2,end) infinite}
+@keyframes cutblink{50%{opacity:.15}}
+.levt{position:absolute;left:0;right:0;height:0;border-top:2px solid #f6d79a;z-index:2}
+.levt i{position:absolute;right:4px;top:-11px;font-size:9px;font-style:normal;font-weight:800;color:#f6d79a}
+.levt.cut{border-color:#ff8f7a}.levt.cut i{color:#ff8f7a}
+.lband{position:absolute;left:0;right:0;background:rgba(95,224,192,.14);z-index:0}
+.lmark{position:absolute;left:50%;z-index:3;transform:translate(-50%,50%);width:22px;height:22px;border-radius:50%;background:var(--bg);border:3px solid var(--text);bottom:45%;transition:bottom .07s ease-out,transform .08s}
+.lmark.hot{border-color:#f6d79a;transform:translate(-50%,50%) scale(1.28);animation:mkblink .3s steps(2,end) infinite}
+@keyframes mkblink{50%{opacity:.25}}
+.linlab{position:absolute;left:0;right:0;bottom:7px;text-align:center;font-size:10px;font-weight:800;color:#0b0f12;z-index:4;white-space:nowrap;overflow:hidden}
+.lh-cut{position:absolute;left:0;right:0;top:6px;text-align:center;font-size:.7rem;font-weight:800;color:#f6d79a;opacity:0;transition:opacity .1s}
+.lh-cut.on{opacity:1}
+.lh-right{flex:1;display:flex;flex-direction:column;gap:8px}
+.lh-exs{display:flex;flex-wrap:wrap;gap:5px}
+.lhx{padding:6px 11px;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;font-size:.73rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.lhx.on{background:var(--mint);color:#0b0f12;border-color:var(--mint)}
+.lh-opt{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.lh-opt label{font-size:.72rem;color:var(--muted);margin-right:2px}
+.lh-opt select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 7px;font-size:.76rem}
+.etabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.etab{padding:5px 9px;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;font-size:.7rem;font-weight:700;cursor:pointer}
+.etab.on{background:var(--mint);color:#0b0f12;border-color:var(--mint)}
+.esel{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 7px;font-size:.75rem}
+.einfo{font-size:.72rem;color:var(--muted);margin-top:5px}
+.einfo b{color:var(--mint)}
+.lh-note{margin-top:9px;font-size:.74rem;line-height:1.6;color:var(--muted)}
 #scoreCard svg{display:block;margin:0 auto;max-width:100%;height:auto}
 #ansScore svg{display:block;margin:0 auto;max-width:100%;max-height:150px}
 /* 큰 화면(아이패드 등)에서 악보 패널만 화면 폭에 맞게 넓게 — 컨트롤은 그대로, 가로 스크롤 없음 */
@@ -268,6 +331,14 @@ input[type=range]{flex:1;accent-color:var(--mint)}
     <canvas id="ring" width="496" height="496"></canvas>
     <div id="ssCard" class="hide"><div class="scoremsg">[생성]을 눌러 시창 멜로디를 만드세요</div></div>
     <div class="prompt" id="prompt">들어보기를 눌러 시작</div>
+  <div id="handsWrap" class="hide"><div class="solo-bar"><button class="solo-btn" id="soloBtn">▶ 음악 없이 연습</button><span class="solo-hint" id="soloHint">악보 재생 없이 손만 돌려요</span></div><div class="hands"><div class="hand-l"><div class="hand-cap">왼손</div><div class="lh-track"><div class="lh-sig"><div class="sigdot" id="lhSig"><span id="lhSigN"></span></div><div class="sigtxt" id="lhSigT">큐</div></div><div class="lh-gauge"><div class="lh-fill" id="lhFill"></div><div class="ltgt hide" id="lhTgt"></div><div class="lmark" id="lhMark"></div><div class="cutdot hide" id="lhCut2"></div><div class="linlab" id="lhIn"></div></div></div></div><div class="hand-r"><div class="hand-cap">오른손</div><div id="btSvgWrap"></div><div class="bt-beatn" id="btBeatN">–</div><div class="ax-bar"><span>가로축</span><select id="axL"></select><button class="ax-auto" id="axAuto">자동</button></div></div></div></div>
+  <div id="lhWrap" class="hide"><button class="lh-toggle" id="lhToggle">＋ 왼손 분리 연습</button><div class="lh-box" id="lhBox"><div class="lh-head">왼손 · <b id="lhName">중립 유지</b></div><div class="lh-main"><div class="lh-right"><div class="lh-exs"><button class="lhx on" data-x="hold">정지(중립)</button><button class="lhx" data-x="cresc">크레셴도</button><button class="lhx" data-x="dim">디크레셴도</button><button class="lhx" data-x="cue">큐</button><button class="lhx" data-x="sus">지속음</button><button class="lhx" data-x="score">악보 따라</button><button class="lhx" data-x="emo">감정 따라</button></div><div class="lh-opt" id="lhOpt"></div></div></div><div class="lh-note" id="lhNote">오른손은 박 패턴 유지, 왼손은 위 과제를 동시에 — 따라하기(미러링) 없이.</div></div>
+  </div>
+  <div class="panel hide" id="scorePanel">
+    <div class="ph" id="scoreHead"><span>악보 미리보기 <span style="color:var(--muted);font-weight:400;font-size:12px">· 멜로디 + 코드</span></span><span class="ch">▾</span></div>
+    <div class="pbody"><div id="scoreCard"><div class="scoremsg">악보 라이브러리를 불러오는 중…</div></div>
+  </div>
+  </div>
   </div>
   <div class="hide" id="errBar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 8px"></div>
   <div class="hide" id="errScore" style="margin:2px 0 8px;background:#f7f5ef;border-radius:14px;padding:10px 8px;overflow-x:auto"></div>
@@ -315,10 +386,6 @@ input[type=range]{flex:1;accent-color:var(--mint)}
     <div class="bar"><button class="btn" id="rNew">🎵 새 곡</button><button class="btn" id="rGen">🎲 랜덤</button></div>
     <div class="bar"><button class="btn primary" id="rPlay">재생</button></div>
     <div class="bar"><button class="btn" id="rEndless">♾️ 무한 생성</button><button class="btn" id="rAuto">🔀 자동 랜덤 연습</button></div>
-  </div>
-  <div class="panel hide" id="scorePanel">
-    <div class="ph" id="scoreHead"><span>악보 미리보기 <span style="color:var(--muted);font-weight:400;font-size:12px">· 멜로디 + 코드</span></span><span class="ch">▾</span></div>
-    <div class="pbody"><div id="scoreCard"><div class="scoremsg">악보 라이브러리를 불러오는 중…</div></div></div>
   </div>
   <div class="panel hide" id="anPanel">
     <div class="pbody" style="padding-top:10px">
@@ -584,9 +651,10 @@ function meterInfo(num,den,grp){const unit=4/den,q=num*unit,comp=(den===8||den==
 // 덧셈(조합) 박자의 묶음 후보 — /8 불규칙 박자에서만
 function groupOptions(num,den){const M={
   '5/8':[[2,3]],'6/8':[[2,2,2]],'7/8':[[3,2,2],[2,3,2]],
-  '8/8':[[3,2,3],[2,3,3],[2,2,2,2]],'9/8':[[2,2,2,3]],
-  '10/8':[[3,2,3,2],[2,3,2,3],[2,2,3,3],[2,2,2,2,2]],
-  '11/8':[[2,3,3,3],[3,3,2,3]],'12/8':[[3,3,2,2,2],[2,2,2,2,2,2]],
+  '8/8':[[3,2,3],[2,3,3],[2,2,2,2]],'9/8':[[2,2,2,3],[2,2,3,2],[2,3,2,2],[3,2,2,2]],
+  '10/8':[[3,2,3,2],[2,3,2,3],[2,2,3,3],[2,3,3,2],[2,2,2,2,2]],
+  '11/8':[[2,3,3,3],[3,3,2,3],[3,2,3,3],[2,2,2,2,3],[3,2,2,2,2],[2,2,3,2,2]],
+  '12/8':[[3,3,2,2,2],[2,2,2,3,3],[2,2,2,2,2,2]],
   '3/4':[[3,3]],'4/4':[[3,3,2],[3,2,3],[2,3,3]],
   '5/4':[[3,3,2,2],[2,2,3,3],[3,2,3,2]],'6/4':[[3,3,3,3]],
   '7/4':[[3,3,2,2,2,2],[2,2,2,2,3,3]]};
@@ -605,7 +673,7 @@ function naturalUnit(num,den){return (den===8&&num%3===0)?'d4':den===2?'2':den==
 function ensureUnit(){const ok=compatUnits(R.num,R.den);if(!ok.includes(R.unit))R.unit=ok.includes(naturalUnit(R.num,R.den))?naturalUnit(R.num,R.den):ok[0];}
 // 박자표: 검증된 목록만 (16분 박자 없음, 큰 분자 제외)
 const SIGS=['2/4','3/4','4/4','5/4','6/4','7/4','2/2','3/2','4/2','5/2','3/8','5/8','6/8','7/8','8/8','9/8','10/8','11/8','12/8'];
-function applySig(s){const p=(s||R.sig).split('/');R.num=+p[0];R.den=+p[1];R.group='auto';} // 기본박(R.unit)은 박자표와 분리 — 그대로 유지
+function applySig(s){const p=(s||R.sig).split('/');R.num=+p[0];R.den=+p[1];R.group='auto';if(typeof shapeRefresh==='function'&&mode==='rhythm')try{shapeRefresh();}catch(_e){}} // 기본박(R.unit)은 박자표와 분리 — 그대로 유지
 function pickSig(){const s=SIGS[(Math.random()*SIGS.length)|0].split('/');return {num:+s[0],den:+s[1]};}
 
 /* ---------- 상태 ---------- */
@@ -1936,6 +2004,336 @@ function exportMIDI(){if(!R.measuresData||R.measuresData.length!==R.measures)gen
   let bytes=[].concat(sbm('MThd'),u32(6),u16(1),u16(tr.length),u16(480));tr.forEach(t=>bytes=bytes.concat(t));
   const blob=new Blob([new Uint8Array(bytes)],{type:'audio/midi'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cadence_'+(meterVaries()?'mixed':meterStr().replace('/','-'))+'_'+R.measures+'.mid';a.click();toast('MIDI 저장됨');}
 
+
+
+/* ---------- 비팅 도형(좌/우 배분) ---------- */
+const BTPAT={2:{L:0,R:0},3:{L:0,R:1},4:{L:1,R:1},5:{L:1,R:2},6:{L:2,R:2},7:{L:2,R:3},8:{L:3,R:3},9:{L:3,R:4},12:{L:5,R:5}};
+const SHAPE={L:null};
+function btSplit(m){const mid=Math.max(0,m-2);
+  if(SHAPE.L!=null){const L=Math.max(0,Math.min(mid,SHAPE.L));return {L:L,R:mid-L};}
+  const p=BTPAT[m];if(p)return p;const L=Math.floor(mid/2);return {L:L,R:mid-L};}
+function btPoints(m){
+  const sp=btSplit(m),L=sp.L,R=sp.R,CX=150,TOP=74,BOT=182,LX=54,RX=246;
+  const pts=[[CX,BOT]];
+  for(let i=0;i<L;i++){const s=(L===1)?1:(i/(L-1)), t=(L===1)?1:(0.38+0.62*s);   /* 안쪽 → 바깥쪽 */
+    pts.push([CX-(CX-LX)*t, BOT-(BOT-TOP)*(0.18+0.30*s)]);}
+  for(let j=0;j<R;j++){const s2=(R===1)?1:(j/(R-1)), u=(R===1)?1:(0.38+0.62*s2); /* 안쪽 → 바깥쪽 */
+    pts.push([CX+(RX-CX)*u, BOT-(BOT-TOP)*(0.20+0.42*s2)]);}
+  pts.push([CX,TOP]);
+  return pts;
+}
+/* 박자표 → 지휘 박 수(3분박이면 점음표 단위로 묶음) */
+function btBeatsOf(num,den){
+  try{const mi=meterInfo(num,den,null);if(mi&&mi.pulse&&mi.pulse.length)return mi.pulse.length;}catch(_e){}
+  if(den===8){ if(num%3===0&&num>=6)return num/3; return num; }
+  return num;
+}
+/* 박 묶음 길이(4분음표 단위) — 2묶음/3묶음의 길이 차이를 반영 */
+function btPulses(num,den){
+  try{const mi=meterInfo(num,den,null);if(mi&&mi.pulse&&mi.pulse.length)return {P:mi.pulse,q:mi.q,g:mi.groups};}catch(_e){}
+  const q=num*(4/den),n=btBeatsOf(num,den),P=[];for(let i=0;i<n;i++)P.push(i*q/n);
+  return {P:P,q:q,g:null};
+}
+
+/* ---------- 비팅 도형 표시 ---------- */
+let _shapeN=0;
+function shapeRender(n){
+  if(_shapeN===n)return; _shapeN=n;
+  const pts=btPoints(n);
+  const path='M'+pts.map(p=>p[0]+','+p[1]).join(' L')+' L'+pts[0][0]+','+pts[0][1];
+  let s='<svg viewBox="0 0 300 220">';
+  s+='<path d="'+path+'" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1.6" stroke-dasharray="4 4"/>';
+  pts.forEach((p,i)=>{
+    s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===0?11:9)+'" fill="'+(i===0?'#f6d79a':'#5fe0c0')+'" opacity=".4"/>';
+    s+='<text x="'+p[0]+'" y="'+(p[1]+4)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#eaf1f2">'+(i+1)+'</text>';
+  });
+  s+='<circle id="btDot" cx="'+pts[0][0]+'" cy="'+pts[0][1]+'" r="12" fill="#5fe0c0"/></svg>';
+  const w=$('btSvgWrap'); if(w)w.innerHTML=s;
+}
+function axSync(){
+  const sel=$('axL'); if(!sel)return;
+  const m=btBeatsOf(R.num||4,R.den||4), mid=Math.max(0,m-2);
+  const bar=sel.closest('.ax-bar'); if(bar)bar.style.display=(mid<1)?'none':'flex';
+  if(mid<1){sel.innerHTML='';return;}
+  const cur=(SHAPE.L!=null)?Math.min(SHAPE.L,mid):btSplit(m).L;
+  const lo=(mid>=2)?1:0, hi=(mid>=2)?mid-1:mid;
+  const cur2=Math.max(lo,Math.min(hi,cur)); if(cur2!==cur)SHAPE.L=cur2;
+  let o='';for(let i=lo;i<=hi;i++)o+='<option value="'+i+'"'+(i===cur2?' selected':'')+'>왼쪽 '+i+' · 오른쪽 '+(mid-i)+'</option>';
+  sel.innerHTML=o;
+  sel.onchange=function(){SHAPE.L=+this.value;_shapeN=0;shapeUpdate(m-1,m);};
+  const rb=$('axAuto'); if(rb&&!rb._b){rb._b=1;rb.addEventListener('click',function(){SHAPE.L=null;_shapeN=0;axSync();shapeUpdate(btBeatsOf(R.num||4,R.den||4)-1,btBeatsOf(R.num||4,R.den||4));});}
+}
+function shapeRefresh(){const m=btBeatsOf(R.num||4,R.den||4);_shapeN=0;axSync();shapeUpdate(m-1,m);}
+function shapeUpdate(beatPos,n,ratio){
+  shapeRender(n);
+  const rr=Math.max(0.7,Math.min(1.7,ratio||1));      /* 박 길이 비율(2묶음 vs 3묶음) */
+  const pts=btPoints(n), bi=Math.min(n-1,Math.max(0,Math.floor(beatPos))), fr=beatPos-Math.floor(beatPos);
+  const p0=pts[bi],p1=pts[(bi+1)%n];
+  /* 중력·관성: 익투스 직후 튀어 오르고(감속), 다음 익투스로 떨어지며 가속 */
+  const isLast=(bi===n-1);                          /* 마지막 박(업) — 제자리에서 위로 툭 */
+  const te=Math.pow(fr,isLast?1.42:1.28);           /* 도착 가속(마지막 박은 더 급하게 낙하) */
+  const rise=(bi===0?34:(isLast?48:22))*Math.pow(rr,1.35);  /* 체공시간이 길수록 높이 뜀 */
+  const arc=rise*Math.sin(Math.PI*Math.pow(fr,isLast?0.62:0.85));
+  const x=p0[0]+(p1[0]-p0[0])*te;
+  const y=p0[1]+(p1[1]-p0[1])*te-arc;
+  const d=document.getElementById('btDot');
+  if(d){d.setAttribute('cx',x);d.setAttribute('cy',y);
+    const sq=fr<0.10?(1-fr*3.2):1;                  /* 익투스 순간 눌림 */
+    d.setAttribute('r',(12*(0.82+0.18*sq)).toFixed(1));}
+  const lab=$('btBeatN'); if(lab)lab.innerHTML='<b>'+(bi+1)+'</b> / '+n;
+}
+
+
+/* ---------- 무음 연습(솔로) 클럭 ---------- */
+const SOLO={on:false,t0:0};
+function soloToggle(){
+  SOLO.on=!SOLO.on;
+  const b=$('soloBtn');
+  if(b){b.classList.toggle('on',SOLO.on);b.textContent=SOLO.on?'■ 멈춤':'▶ 음악 없이 연습';}
+  const hint=$('soloHint');
+  if(hint)hint.textContent=SOLO.on?('BPM '+R.bpm+' · '+(R.sig||'4/4')+' — 소리 없이 손만'):'악보 재생 없이 손만 돌려요';
+  if(SOLO.on)SOLO.t0=(ctx?ctx.currentTime:performance.now()/1000);
+}
+function soloFrame(){
+  if(!SOLO.on||mode!=='rhythm'||rPlaying)return false;
+  const now=(ctx?ctx.currentTime:performance.now()/1000);
+  const PU=btPulses(R.num||4,R.den||4), P=PU.P, beats=P.length, qTot=PU.q;
+  const spq=60/(R.bpm||96)/( (R.den===8)?1.5:1 );   /* 4분음표 1개에 걸리는 시간 */
+  const barSec=qTot*spq, prep=(qTot-P[beats-1])*spq; /* 예비박 = 마지막 묶음 길이 */
+  const el=(now-SOLO.t0)-prep;
+  if(el<0){ shapeUpdate(beats-1+Math.min(0.999,(now-SOLO.t0)/prep), beats); return true; }
+  const measIdx=Math.floor(el/barSec)%Math.max(1,R.measures||8);
+  const inBar=(el%barSec)/spq;
+  let bi=0;for(let i=0;i<beats;i++)if(inBar>=P[i]-1e-6)bi=i;
+  const bLen=((bi<beats-1?P[bi+1]:qTot)-P[bi])||1;
+  const bp=bi+Math.min(0.999,Math.max(0,(inBar-P[bi])/bLen));
+  shapeUpdate(bp,beats,bLen/(qTot/beats)); window._lhP=P;window._lhQ=qTot;window._lhQpos=inBar; lhFrame(measIdx,bp,beats);
+  return true;
+}
+var EGROUPS=[
+ {id:"A",name:"조용한 어두움",cls:"gA"},
+ {id:"B",name:"조용한 밝음",cls:"gB"},
+ {id:"C",name:"섞인 감정",cls:"gC"},
+ {id:"D",name:"솟아오르는 밝음",cls:"gD"},
+ {id:"E",name:"몰아치는 어두움",cls:"gE"},
+ {id:"F",name:"따로 노는 것",cls:"gF"}
+];
+var EEMO=[
+ {g:"A",n:"슬픔",  cl:"파시브",lk:"레가토",sz:"작게",r:2,     auf:"길고 느리게, 점 없이", lh:"지속 · 하향 압",      sc:"총주 뒤 현이 홀로 남아 이어갈 때"},
+ {g:"A",n:"쓸쓸함",cl:"파시브",lk:"레가토",sz:"아주 작게",r:1, auf:"길게, 거의 정지",      lh:"정지, 개입 최소",     sc:"독주 목관 하나만 남고 반주가 사라질 때"},
+ {g:"A",n:"체념",  cl:"파시브",lk:"레가토",sz:"점점 작게",r:2, auf:"늘어짐",               lh:"하강 후 정지",        sc:"악기가 하나씩 빠지며 내려앉을 때"},
+ {g:"A",n:"공허",  cl:"파시브",lk:"레가토",sz:"아주 작게",r:1, auf:"모호하게",             lh:"부동",                sc:"3도 없는 빈 화음이 극단 음역에 걸릴 때"},
+ {g:"B",n:"평온",  cl:"파시브",lk:"레가토",sz:"중간",r:3,     auf:"길고 균질하게",        lh:"펼침 · 지속",         sc:"넓게 벌린 지속 화음이 움직이지 않을 때"},
+ {g:"B",n:"온기",  cl:"파시브",lk:"레가토",sz:"중간",r:3,     auf:"둥글게",               lh:"감쌈 · 안쪽으로",     sc:"클라리넷·호른이 중역에서 겹칠 때"},
+ {g:"B",n:"애틋함",cl:"파시브",lk:"레가토",sz:"아주 작게",r:1, auf:"길고 조심스럽게",      lh:"정지, 시선으로",      sc:"바이올린 독주가 완전히 노출될 때"},
+ {g:"C",n:"그리움",cl:"파시브",lk:"레가토",sz:"대비 크게",r:4, auf:"길게",                 lh:"독주 억제 / 총주 견인",sc:"독주와 총주가 번갈아 회상을 주고받을 때"},
+ {g:"C",n:"비장",  cl:"악티브",lk:"레가토",sz:"크게",r:4,     auf:"눌러서",               lh:"저역 압박",           sc:"저역이 무겁게 깔린 채 선율이 올라갈 때"},
+ {g:"C",n:"경외",  cl:"파시브",lk:"레가토",sz:"크게",r:4,     auf:"아주 길게",            lh:"음역 높이차 지시",    sc:"극저역과 극고역만 남고 중간이 빌 때"},
+ {g:"C",n:"초월",  cl:"파시브",lk:"레가토",sz:"크게",r:4,     auf:"상승",                 lh:"든 채 유지",          sc:"올라간 뒤 끝내지 않고 그대로 지속할 때"},
+ {g:"D",n:"환희",  cl:"악티브",lk:"레가토",sz:"크게",r:4,     auf:"짧고 탄력 있게",       lh:"개방",                sc:"전 음역이 열리며 두터운 화성에 닿을 때"},
+ {g:"D",n:"고양",  cl:"악티브",lk:"레가토",sz:"점점 크게",r:4, auf:"점점 짧게",            lh:"순차 큐",             sc:"악기가 하나씩 얹히며 올라갈 때"},
+ {g:"D",n:"승리",  cl:"악티브",lk:"세코",  sz:"최대",r:5,     auf:"짧고 단호하게",        lh:"금관 지시",           sc:"금관 유니즌 팡파르로 닫을 때"},
+ {g:"D",n:"활기",  cl:"악티브",lk:"세코",  sz:"작게",r:2,     auf:"짧게",                 lh:"최소 · 가벼운 큐",    sc:"스타카토 목관이 간극을 두고 튀어다닐 때"},
+ {g:"E",n:"긴장",  cl:"악티브",lk:"세코",  sz:"작게",r:2,     auf:"짧고 억제해서",        lh:"하향 억제",           sc:"저현 트레몰로가 선율 없이 깔릴 때"},
+ {g:"E",n:"불안",  cl:"악티브",lk:"세코",  sz:"불균등",r:3,   auf:"불안정하게",           lh:"파편 큐",             sc:"목관 단편이 어긋나며 끊길 때"},
+ {g:"E",n:"공포",  cl:"악티브",lk:"세코",  sz:"급변",r:5,     auf:"없거나 아주 급하게",   lh:"급정지 / 급개방",     sc:"돌발 sfz가 침묵을 찢을 때"},
+ {g:"E",n:"절박",  cl:"악티브",lk:"레가토",sz:"크게",r:4,     auf:"짧게",                 lh:"계속 견인",           sc:"현 급속 음형이 쉼 없이 이어질 때"},
+ {g:"E",n:"광란",  cl:"악티브",lk:"세코",  sz:"최대",r:5,     auf:"짧게",                 lh:"최소, 박만",          sc:"튜티와 타악이 포화 상태로 몰아칠 때"},
+ {g:"F",n:"익살",  cl:"악티브",lk:"세코",  sz:"중간 · 급변",r:3,auf:"변칙적으로",         lh:"과장 큐",             sc:"기대를 어긋내는 타이밍이 웃음이 될 때"}
+];
+var EVARS=[
+ {t:"큰 파시브",s:"크기 ↑ · 파시브 유지",b:"경외 · 초월 · 총주의 평온. 큰데 점이 없다."},
+ {t:"작은 악티브",s:"크기 ↓ · 악티브 유지",b:"긴장 · 활기. 손목만으로 점을 또렷하게."},
+ {t:"파시브 세코",s:"두 축의 분리",b:"점은 흐린데 박은 끊는다. 드물지만 강력."},
+ {t:"악티브 레가토",s:"두 축의 분리",b:"점은 또렷한데 이어 끈다. 비장 · 절박."},
+ {t:"업이 악티브",s:"방향 분리",b:"여린내기 진입. 업에 점을 준다."},
+ {t:"약박이 큼",s:"강세 분리",b:"4박 반동으로 다음 강박을 끌어온다."},
+ {t:"벗어날 때",s:"공통 규칙",b:"예비박이 먼저 알린다. 예고 없으면 사고다."}
+];
+var EGROW=[
+ {t:"흐린 축적",s:"파시브 유지",b:"슬픔 · 그리움 · 쓸쓸함",c:"gA"},
+ {t:"무거운 축적",s:"파시브 → 악티브",b:"비장 · 경외 · 절박",c:"gC"},
+ {t:"가벼운 축적",s:"악티브 유지 · 예비박 단축",b:"환희 · 고양 · 활기",c:"gD"}
+];
+var EMOS={grp:EEMO[0].g, cur:EEMO[0]};
+function emoTarget(bp,n,measIdx,barPos){
+  var e=EMOS.cur,t=e.lh,bi=Math.floor(bp),fr=bp-bi,last=(bi===n-1),first=(bi===0);
+  var br=Math.sin(barPos*Math.PI*2), sw=Math.sin(barPos*Math.PI);
+  if(/급정지|급개방/.test(t)){ if(last&&fr<0.35)return {v:0.95,flash:true,tag:'급개방'};
+    if(last&&fr>=0.55)return {v:0.14,cut:true,tag:'급정지'}; return {v:0.18+0.04*br,tag:'닫힘'};}
+  if(/파편/.test(t)){var hit=((bi*5+3)%3===0)&&fr<0.26;
+    return hit?{v:0.88,flash:true,tag:'파편 큐'}:{v:0.32+0.08*Math.sin(bp*3.7),tag:'억제'};}
+  if(/순차 큐/.test(t)){var on=fr<0.30;
+    return on?{v:0.55+0.34*(bi/(n-1||1)),flash:true,tag:(bi+1)+'번째 큐'}:{v:0.44+0.10*sw,tag:'다음 큐 준비'};}
+  if(/금관|과장 큐|가벼운 큐/.test(t)){ if(last&&fr<0.5)return {v:0.92,flash:true,tag:'큐'};
+    if(last)return {v:0.42,tag:'되돌림'}; if(bi===n-2&&fr>0.55)return {v:0.30,tag:'큐 예비'};
+    return {v:0.46+0.06*br,tag:'대기'};}
+  if(/계속 견인/.test(t))return {v:0.60+0.16*sw,flash:(first&&fr<0.08),tag:'견인'};
+  if(/독주 억제/.test(t))return {v:0.34+0.22*sw,tag:sw>0.6?'총주 견인':'독주 억제'};
+  if(/하강 후 정지/.test(t))return {v:Math.max(0.24,0.74-barPos*0.56),tag:barPos<0.85?'하강 중':'정지'};
+  if(/부동|정지, 개입|최소, 박만|시선/.test(t))return {v:0.45+0.015*br,tag:'개입 없음'};
+  if(/하향|저역|억제/.test(t))return {v:0.32-0.09*sw,flash:(first&&fr<0.10),tag:first&&fr<0.3?'눌러 내림':'낮게 유지'};
+  if(/감쌈/.test(t))return {v:0.54+0.12*sw,tag:sw>0.5?'모아 감쌈':'풀어 둠'};
+  if(/음역/.test(t))return {v:(bi%2===0)?0.80-0.06*sw:0.28+0.06*sw,tag:(bi%2===0)?'고역 지시':'저역 지시'};
+  if(/펼침|개방|든 채|지속/.test(t))return {v:0.72+0.14*sw,flash:(first&&fr<0.10),tag:sw>0.6?'더 펼침':'펼쳐 유지'};
+  return {v:0.45+0.05*br,tag:'중립'};
+}
+function emoBuild(){
+  var g=$('emoTabs'),s=$('emoSel'); if(!g||!s)return;
+  var gh='';EGROUPS.forEach(function(x){gh+='<button class="etab'+(EMOS.grp===x.id?' on':'')+'" data-g="'+x.id+'">'+x.name+'</button>';});
+  g.innerHTML=gh;
+  var eh='';EEMO.forEach(function(x,i){if(x.g===EMOS.grp)eh+='<option value="'+i+'"'+(x.n===EMOS.cur.n?' selected':'')+'>'+x.n+'</option>';});
+  s.innerHTML=eh;
+  var inf=$('emoInfo');
+  if(inf)inf.innerHTML='<b>'+EMOS.cur.n+'</b> · '+EMOS.cur.cl+'·'+EMOS.cur.lk+' · 왼손 <b>'+EMOS.cur.lh+'</b>';
+  if(!g._b){g._b=1;g.addEventListener('click',function(ev){var b=ev.target.closest('.etab');if(!b)return;
+    EMOS.grp=b.getAttribute('data-g');var l=EEMO.filter(function(x){return x.g===EMOS.grp;});if(l.length)EMOS.cur=l[0];emoBuild();lhSync();});}
+  if(!s._b){s._b=1;s.addEventListener('change',function(){EMOS.cur=EEMO[+this.value];emoBuild();lhSync();});}
+}
+/* ---------- 왼손 · 악보 따라가기 ---------- */
+function lhFromScore(measIdx,beatPos,meter){
+  const md=R.measuresData&&R.measuresData[measIdx];
+  if(!md)return null;
+  const hp=md.hairpin;                        /* 'cresc' | 'dim' | null */
+  const pos=beatPos/meter;
+  if(hp==='cresc'||hp==='<') return {v:0.35+pos*0.60,flash:false,cut:false,tag:'크레셴도'};
+  if(hp==='dim'||hp==='>')   return {v:0.92-pos*0.50,flash:false,cut:false,tag:'디미누엔도'};
+  const lastCell=md.cells&&md.cells[md.cells.length-1];
+  if(md.fermata||(lastCell&&lastCell.fer)){
+    if(pos<0.85)return {v:0.82,flash:(pos<0.1),cut:false,tag:'페르마타 유지'};
+    return {v:0.40,flash:false,cut:true,tag:'컷'};
+  }
+  const nx=R.measuresData[measIdx+1];
+  if(nx&&nx.dynMark&&pos>((meter-1)/meter)) return {v:0.9,flash:true,cut:false,tag:'다음 마디 큐'};
+  if(md.dynMark) return {v:(/f/.test(md.dynMark)?0.72:0.38),flash:(pos<0.1),cut:false,tag:md.dynMark};
+  return {v:0.45,flash:false,cut:false,tag:'중립'};
+}
+/* ---------- 왼손 분리 연습 ---------- */
+const LHT={on:false,ex:'hold',cue:-1,cBars:4,cFrom:1,sus:4,susFrom:0,cut:true};
+const LHNAME={hold:'중립 유지 — 개입하지 않기',cresc:'크레셴도 — 정한 마디에 걸쳐 키우기',dim:'디크레셴도 — 정한 마디에 걸쳐 줄이기',cue:'큐 — 정한 박에 진입 신호',sus:'지속음 — 음가만큼 유지하고 컷',score:'악보 따라 — 셈여림·페르마타를 왼손으로',emo:'감정 따라 — 감정의 왼손 지시를 그대로'};
+const SUSVAL=[['4','온음표'],['3','점2분음표'],['2','2분음표'],['1.5','점4분음표'],['1','4분음표'],['0.5','8분음표']];
+function lhOptHTML(){
+  const m=Math.max(1,btBeatsOf(R.num||4,R.den||4));
+  if(LHT.ex==='emo'){return '<div id="emoTabs" class="etabs"></div><select id="emoSel" class="esel"></select><div id="emoInfo" class="einfo"></div>';}
+  if(LHT.ex==='cue'){
+    let o='<label>큐 박</label><select id="lhCue">';
+    for(let i=0;i<m;i++)o+='<option value="'+i+'"'+(LHT.cue===i?' selected':'')+'>'+(i+1)+'박</option>';
+    o+='<option value="-1"'+(LHT.cue===-1?' selected':'')+'>마지막 박</option></select>';
+    return o;
+  }
+  if(LHT.ex==='cresc'||LHT.ex==='dim'){
+    let o='<label>길이</label><select id="lhCB">';
+    [2,4,8].forEach(function(x){o+='<option value="'+x+'"'+(LHT.cBars===x?' selected':'')+'>'+x+'마디</option>';});
+    o+='</select><label>시작</label><select id="lhCF">';
+    for(let i=1;i<=Math.max(1,R.measures||8);i++)o+='<option value="'+i+'"'+(LHT.cFrom===i?' selected':'')+'>'+i+'마디</option>';
+    o+='</select>';
+    return o;
+  }
+  if(LHT.ex==='sus'){
+    let o='<label>시작</label><select id="lhSF">';
+    for(let i=0;i<m;i++)o+='<option value="'+i+'"'+(LHT.susFrom===i?' selected':'')+'>'+(i+1)+'박</option>';
+    o+='</select><label>음가</label><select id="lhSV">';
+    SUSVAL.forEach(function(x){o+='<option value="'+x[0]+'"'+(String(LHT.sus)===x[0]?' selected':'')+'>'+x[1]+'</option>';});
+    o+='</select><label>컷</label><select id="lhCut2"><option value="1"'+(LHT.cut?' selected':'')+'>표시</option><option value="0"'+(!LHT.cut?' selected':'')+'>끔</option></select>';
+    return o;
+  }
+  if(LHT.ex==='score')return '<span style="font-size:.72rem;color:var(--muted)">악보의 셈여림\u00b7페르마타를 왼손이 따라가요 \u2014 지금: <b id="lhTag" style="color:var(--mint)">–</b></span>';return '<span style="font-size:.72rem;color:var(--muted)">왼손은 움직이지 않아요 — 오른손만 유지하는 훈련이에요.</span>';
+}
+function lhSync(){
+  if(LHT.ex==='emo')setTimeout(emoBuild,0);
+  const n=$('lhName');if(n)n.textContent=LHNAME[LHT.ex];
+  const o=$('lhOpt');if(o)o.innerHTML=lhOptHTML();
+  const c=$('lhCue');if(c)c.onchange=function(){LHT.cue=+this.value;lhSync();};
+  const cb=$('lhCB');if(cb)cb.onchange=function(){LHT.cBars=+this.value;lhSync();};
+  const cf=$('lhCF');if(cf)cf.onchange=function(){LHT.cFrom=+this.value;lhSync();};
+  const sv=$('lhSV');if(sv)sv.onchange=function(){LHT.sus=parseFloat(this.value);lhSync();};
+  const sf=$('lhSF');if(sf)sf.onchange=function(){LHT.susFrom=+this.value;lhSync();};
+  const c2=$('lhCut2');if(c2)c2.onchange=function(){LHT.cut=(this.value==='1');lhSync();};
+  const m2=Math.max(1,btBeatsOf(R.num||4,R.den||4));
+  const SUSN={4:'온음표',3:'점2분',2:'2분',1.5:'점4분',1:'4분',0.5:'8분'};
+  const LAB={hold:'정지(중립)',
+    cresc:'크레셴도 · '+LHT.cBars+'마디@'+LHT.cFrom,
+    dim:'디크레셴도 · '+LHT.cBars+'마디@'+LHT.cFrom,
+    cue:'큐 · '+(LHT.cue<0?'마지막':(Math.min(LHT.cue,m2-1)+1))+'박',
+    sus:'지속음 · '+(Math.min(LHT.susFrom,m2-1)+1)+'박~'+(SUSN[LHT.sus]||LHT.sus)+(LHT.cut?' +컷':''),
+    score:'악보 따라',emo:'감정 따라 · '+EMOS.cur.n};
+  document.querySelectorAll('.lhx').forEach(function(b){const k=b.getAttribute('data-x');
+    b.classList.toggle('on',k===LHT.ex);
+    b.textContent=LAB[k];});   /* 선택 여부와 무관하게 설정값을 항상 표시 */
+}
+function lhInit(){
+  const sb=$('soloBtn');if(sb&&!sb._b){sb._b=1;sb.addEventListener('click',soloToggle);}
+  const t=$('lhToggle');if(!t||t._b)return;t._b=1;
+  t.addEventListener('click',function(){LHT.on=!LHT.on;$('lhBox').classList.toggle('on',LHT.on);
+    t.textContent=(LHT.on?'－ 왼손 분리 연습 닫기':'＋ 왼손 분리 연습');});
+  document.querySelectorAll('.lhx').forEach(function(b){b.addEventListener('click',function(){LHT.ex=b.getAttribute('data-x');lhSync();});});
+  lhSync();
+}
+function lhFrame(measIdx,beatPos,meter){
+  if(!LHT.on)return;
+  const f=$('lhFill');if(!f)return;
+  const P=(window._lhP&&window._lhP.length)?window._lhP:null, qTot=window._lhQ||meter;
+  const nowQ=(window._lhQpos!=null)?window._lhQpos:(beatPos/meter)*qTot;
+  const bi=Math.floor(beatPos),fr=beatPos-bi;
+  const bq=function(k){return P?P[Math.min(k,meter-1)]:(k*qTot/meter);};
+  const remTo=function(q){const d=q-nowQ;return d>=-0.02?d:(qTot-nowQ+q);};
+  let lvl=0.45,tag='',cueQ=null,susProg=null,cutNow=false;
+
+  if(LHT.ex==='cue'){
+    const tgt=(LHT.cue<0?meter-1:Math.min(LHT.cue,meter-1));cueQ=bq(tgt);tag='큐 연습';
+  }
+  else if(LHT.ex==='sus'){
+    const sf=Math.min(LHT.susFrom,meter-1),sQ=bq(sf),eQ=Math.min(qTot,sQ+LHT.sus);
+    if(nowQ<sQ-1e-6){susProg=0;lvl=0.35;tag='시작 대기';}
+    else if(nowQ<eQ){susProg=(nowQ-sQ)/(eQ-sQ);lvl=0.78;tag='지속 중';}
+    else{susProg=1;cutNow=(nowQ-eQ)<0.5;lvl=0.30;tag=cutNow?'컷':'해제';}
+  }
+  else if(LHT.ex==='cresc'||LHT.ex==='dim'){
+    const rel=measIdx-(LHT.cFrom-1);
+    if(rel<0){lvl=0.10;tag=(LHT.cFrom-measIdx)+'마디 뒤 시작';}
+    else{const done=(rel%LHT.cBars)+nowQ/qTot,pos=done/LHT.cBars;
+      lvl=(LHT.ex==='cresc')?(0.10+pos*0.85):(0.95-pos*0.85);
+      tag=(LHT.ex==='cresc'?'↑ ':'↓ ')+(LHT.cBars-done).toFixed(1)+'마디';}
+  }
+  else if(LHT.ex==='emo'){
+    const E=emoTarget(beatPos,meter,measIdx,nowQ/qTot);
+    lvl=E.v;tag=(E.v>0.66?'크게':E.v<0.36?'작게':'중간');
+    if(/큐|지시/.test(EMOS.cur.lh))cueQ=bq(meter-1);
+    if(/급정지|정지/.test(EMOS.cur.lh)&&bi===meter-1&&fr>0.55){susProg=1;cutNow=true;tag='컷';}
+  }
+  else if(LHT.ex==='score'){
+    const s=lhFromScore(measIdx,beatPos,meter);
+    if(s){lvl=s.v;tag=(s.tag||'');if(s.cut){susProg=1;cutNow=true;}}
+  }
+  else {lvl=0.45;tag='중립';}
+
+  /* 큐 원 */
+  const sd=$('lhSig'),sn=$('lhSigN'),stx=$('lhSigT');
+  if(cueQ!=null){const r=remTo(cueQ);
+    if(sn)sn.textContent=(r<0.06?'큐':r.toFixed(1));
+    if(sd)sd.className='sigdot'+(r<0.06?' cue':(r<0.75?' prep':''));
+    if(stx)stx.textContent='큐까지';
+  }else{ if(sn)sn.textContent='–'; if(sd)sd.className='sigdot'; if(stx)stx.textContent='큐 없음'; }
+
+  /* 목표 크기(흰 원) */
+  let goal=lvl;
+  if(LHT.ex==='cresc')goal=0.95; else if(LHT.ex==='dim')goal=0.10;
+  else if(LHT.ex==='sus')goal=0.78;
+  /* 셈여림 = 초록 게이지 */
+  LHV.v+=(lvl-LHV.v)*0.45;
+  f.style.height=Math.max(2,Math.round(LHV.v*100))+'%';
+  const mk=$('lhMark');
+  if(mk){mk.style.bottom=Math.max(2,Math.round(goal*100))+'%';
+    mk.classList.toggle('hot',Math.abs(LHV.v-goal)<0.07);}
+
+  /* 지속음 = 금색 선 · 꼭대기 도달 시 컷 원 */
+  const tg=$('lhTgt'),cd=$('lhCut2');
+  if(susProg==null){ if(tg)tg.classList.add('hide'); if(cd)cd.classList.add('hide'); }
+  else{ if(tg){tg.classList.remove('hide');tg.style.bottom=Math.min(97,Math.round(susProg*97))+'%';}
+        if(cd)cd.classList.toggle('hide',!cutNow); }
+  const il=$('lhIn');if(il)il.textContent=tag||'';
+}
+const LHV={v:0.45};
 /* ---------- 링 ---------- */
 const cv=$('ring'),g2=cv.getContext('2d');cv.width=496;cv.height=496;
 function draw(){requestAnimationFrame(draw);const now=ctx?ctx.currentTime:0,W=cv.width,H=cv.height,cx=W/2,cy=H/2,R0=W*0.34;
@@ -1943,11 +2341,19 @@ function draw(){requestAnimationFrame(draw);const now=ctx?ctx.currentTime:0,W=cv
     if(cur>=0){const h=hs[cur];if(trState._lit!==cur){const old=document.querySelector('.ctbeat.lit');if(old)old.classList.remove('lit');const ch=$('ctb_'+h.mi+'_'+h.bi);if(ch&&ch.classList)ch.classList.add('lit');trState._lit=cur;}
       const cc=$('ctCount');if(cc)cc.textContent=(h.bi+1)+(h.down?' ●':'');}}
     return;}
+  if(SOLO.on&&mode==='rhythm'&&!rPlaying)soloFrame();
   g2.clearRect(0,0,W,H);let pulse=0;for(let i=pulseTimes.length-1;i>=0;i--){const dt=now-pulseTimes[i];if(dt>=0&&dt<0.4)pulse=Math.max(pulse,Math.exp(-dt*8));}
   g2.lineWidth=1.5;g2.strokeStyle='rgba(255,255,255,.09)';g2.beginPath();g2.arc(cx,cy,R0,0,Math.PI*2);g2.stroke();
   let centerTxt=mode==='interval'?'음정':mode==='chord'?'화음':(meterVaries()?'변박':meterStr()),sub='';
   let inCount=false;
   if(mode==='rhythm'&&rPlaying&&R._ciAbs&&now<R._ciEnd){inCount=true;
+    {const _n=btBeatsOf(R.num||4,R.den||4),_N=R._ciAbs.length;
+     let _k=0;for(let i=0;i<_N;i++)if(now>=R._ciAbs[i]-0.02)_k=i;
+     const _bd=(R._ciAbs[1]!=null?R._ciAbs[1]-R._ciAbs[0]:0.5);
+     const _fr=Math.max(0,Math.min(0.999,(now-R._ciAbs[_k])/_bd));
+     if(_k<_N-1)shapeUpdate(_n-1,_n);            /* 예비박 1~n-1: 정지 */
+     else shapeUpdate(_n-1+_fr,_n);}               /* 마지막 예비박에서 출발 */
+
     let cnt=0;for(let i=0;i<R._ciAbs.length;i++)if(now>=R._ciAbs[i]-0.02)cnt=i+1;
     const N=R._ciAbs.length;
     for(let i=0;i<N;i++){const a=-Math.PI/2+(i/N)*Math.PI*2,x=cx+Math.cos(a)*R0,y=cy+Math.sin(a)*R0,on=i<cnt,k=(R._ciKinds&&R._ciKinds[i])||'';
@@ -1963,7 +2369,7 @@ function draw(){requestAnimationFrame(draw);const now=ctx?ctx.currentTime:0,W=cv
       g2.fillStyle=col;g2.beginPath();g2.arc(x,y,rad,0,Math.PI*2);g2.fill();}
     const ang=-Math.PI/2+mp*Math.PI*2;
     g2.strokeStyle='rgba(95,224,192,.85)';g2.lineWidth=2.5;g2.beginPath();g2.moveTo(cx,cy);g2.lineTo(cx+Math.cos(ang)*(R0-4),cy+Math.sin(ang)*(R0-4));g2.stroke();
-    centerTxt=seg.num+'/'+seg.den;sub=(measIdx+1)+' / '+R.measures;}
+    centerTxt=seg.num+'/'+seg.den;sub=(measIdx+1)+' / '+R.measures;var _P=(seg.pulse&&seg.pulse.length)?seg.pulse:[0];var _cb=_P.length;var _bi=0;for(var _i2=0;_i2<_cb;_i2++)if(curQ>=_P[_i2]-1e-6)_bi=_i2;var _bLen=((_bi<_cb-1?_P[_bi+1]:q)-_P[_bi])||1;var _bp=_bi+Math.min(0.999,Math.max(0,(curQ-_P[_bi])/_bLen));var _rr=_bLen/(q/_cb);shapeUpdate(_bp,_cb,_rr);window._lhP=_P;window._lhQ=q;window._lhQpos=curQ;lhFrame(measIdx,_bp,_cb);}
   const r0=R0*0.5;
   if(pulse>0.02){g2.strokeStyle='rgba(95,224,192,'+(pulse*0.6)+')';g2.lineWidth=3;g2.beginPath();g2.arc(cx,cy,r0+5+pulse*12,0,Math.PI*2);g2.stroke();}
   g2.fillStyle='#1b242c';g2.beginPath();g2.arc(cx,cy,r0,0,Math.PI*2);g2.fill();
@@ -2120,7 +2526,7 @@ function setMode(m){if(mode==='err'&&m!=='err'&&R._errSaved){R.perLine=R._errSav
   const r=m==='rhythm',mt=m==='meter',ct=m==='count',an=m==='analyze',ref=(m==='scaleDict'||m==='chordLab'||m==='tuner'),th=m==='theory',quiz=!r&&!mt&&!ct&&!an&&!ref&&!th;
   show('subSeg',quiz&&m!=='err');show('rPanel',r);show('rCtrls',r);show('scorePanel',r||an);show('setPanel',quiz&&m!=='err');show('anPanel',an);
   show('mtPanel',mt);show('mtReadout',mt);show('mtPulseWrap',mt);show('mtCtrls',mt);show('ring',!mt&&!ct&&!ref&&!th&&m!=='err');
-  show('ctPanel',ct);show('ctTimeWrap',ct);show('ctEditor',ct);show('ctCtrls',ct);show('refWrap',ref);show('theoryWrap',th);show('errScore',m==='err');show('errBar',m==='err');if(m==='err'){if(!R._errSaved){R._errSaved={pl:R.perLine,ln:R.lines};}R.perLine='4';R.lines='1';syncMeas();R.measuresData=null;errBarBuild();updateScore();newQuestion();}var _pp=document.getElementById('prompt');if(_pp)_pp.style.display=th?'none':'';var _sm=document.getElementById('scoremsg');if(_sm)_sm.style.display=th?'none':'';var _stgE=document.querySelector('.stage');if(_stgE)_stgE.classList.toggle('hide',th);if(th&&window.__thInit)window.__thInit();
+  show('ctPanel',ct);show('ctTimeWrap',ct);show('ctEditor',ct);show('ctCtrls',ct);show('refWrap',ref);show('theoryWrap',th);show('errScore',m==='err');show('errBar',m==='err');show('lhWrap',m==='rhythm');show('handsWrap',m==='rhythm');if(m==='rhythm'){lhInit();_shapeN=0;axSync();var _nb=btBeatsOf(R.num||4,R.den||4);shapeUpdate(_nb-1,_nb);var _lf=$('lhFill');if(_lf&&!_lf.style.height)_lf.style.height='45%';}if(m==='err'){if(!R._errSaved){R._errSaved={pl:R.perLine,ln:R.lines};}R.perLine='4';R.lines='1';syncMeas();R.measuresData=null;errBarBuild();updateScore();newQuestion();}var _pp=document.getElementById('prompt');if(_pp)_pp.style.display=th?'none':'';var _sm=document.getElementById('scoremsg');if(_sm)_sm.style.display=th?'none':'';var _stgE=document.querySelector('.stage');if(_stgE)_stgE.classList.toggle('hide',th);if(th&&window.__thInit)window.__thInit();
   var _stg=document.querySelector('.stage');if(_stg)_stg.classList.toggle('ptop',r||an);
   if(ct){show('ssCard',false);show('choices',false);show('quizBar',false);show('score',false);show('ssBar1',false);show('ssBar2',false);show('ssInfo',false);
     ctRender();$('prompt').innerHTML='Beating Training';}
