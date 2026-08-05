@@ -2533,7 +2533,7 @@ function trnDraw(bp,n,inPrep,prepK){
     c.setAttribute('r',on?(i===0?15:13):(i===0?11:9));
     c.setAttribute('fill',on?'#ffffff':(i===0?'#8a7a5c':'#2f6f60'));});
   const bn=document.getElementById('trnBeatN');
-  if(bn)bn.innerHTML='<b>'+(inPrep?('예비 '+(prepK||1)):(bi+1))+'</b> / '+n;
+  if(bn)bn.innerHTML='<b>'+(inPrep?('예비 '+((TRN.prepN||4)-(prepK||1)+1)):(bi+1))+'</b> / '+n;
 }
 /* 왼손 과제 */
 function trnLeft(measIdx,bp,n,el,spb,inPrep){
