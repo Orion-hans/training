@@ -66,6 +66,13 @@ canvas#ring{width:248px;height:248px;touch-action:manipulation}
 .mtk{color:var(--muted);font-size:0.75rem;min-width:64px}
 .mtrow b{font-variant-numeric:tabular-nums}
 .mtp{color:var(--mint);font-size:0.75rem}.mtsub{color:var(--muted);font-size:0.6875rem}
+.cvbox{margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+.cvhd{font-size:.66rem;font-weight:800;color:var(--mint);letter-spacing:.08em;margin-bottom:6px}
+.cvrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px}
+.cvk{flex:0 0 auto;font-size:.66rem;font-weight:700;color:var(--muted);min-width:52px}
+.cvi{font-size:.7rem;font-weight:700;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+.cvi.on{background:var(--mint);color:#0b0f12;border-color:var(--mint)}
+.cvnote{font-size:.66rem;color:var(--muted);line-height:1.55;margin-top:4px}
 .mtread{margin-top:8px;color:var(--text);font-size:0.8125rem;line-height:1.55}.mtread b{color:var(--amber)}
 .ctcount{text-align:center;font-size:2.125rem;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.05em;min-height:42px;color:var(--mint)}
 .cttl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
@@ -750,7 +757,7 @@ function meterInfo(num,den,grp){const unit=4/den,q=num*unit,comp=(den===8||den==
   return {q,pulse,unit,groups,E};}
 // 덧셈(조합) 박자의 묶음 후보 — /8 불규칙 박자에서만
 function groupOptions(num,den){const M={
-  '5/8':[[2,3]],'6/8':[[2,2,2]],'7/8':[[3,2,2],[2,3,2]],
+  '4/8':[[2,2]],'5/8':[[2,3]],'6/8':[[2,2,2]],'7/8':[[3,2,2],[2,3,2]],
   '8/8':[[3,2,3],[2,3,3],[2,2,2,2]],'9/8':[[2,2,2,3],[2,2,3,2],[2,3,2,2],[3,2,2,2]],
   '10/8':[[3,2,3,2],[2,3,2,3],[2,2,3,3],[2,3,3,2],[2,2,2,2,2]],
   '11/8':[[2,3,3,3],[3,3,2,3],[3,2,3,3],[2,2,2,2,3],[3,2,2,2,2],[2,2,3,2,2]],
@@ -772,7 +779,7 @@ function compatUnits(num,den){const q=num*4/den,compound=(den===8&&num%3===0),ou
 function naturalUnit(num,den){return (den===8&&num%3===0)?'d4':den===2?'2':den===4?'4':'8';}
 function ensureUnit(){const ok=compatUnits(R.num,R.den);if(!ok.includes(R.unit))R.unit=ok.includes(naturalUnit(R.num,R.den))?naturalUnit(R.num,R.den):ok[0];}
 // 박자표: 검증된 목록만 (16분 박자 없음, 큰 분자 제외)
-const SIGS=['2/4','3/4','4/4','5/4','6/4','7/4','2/2','3/2','4/2','5/2','3/8','5/8','6/8','7/8','8/8','9/8','10/8','11/8','12/8'];
+const SIGS=['2/4','3/4','4/4','5/4','6/4','7/4','2/2','3/2','4/2','5/2','3/8','4/8','5/8','6/8','7/8','8/8','9/8','10/8','11/8','12/8'];
 function applySig(s){const p=(s||R.sig).split('/');R.num=+p[0];R.den=+p[1];R.group='auto';if(typeof shapeRefresh==='function'&&mode==='rhythm')try{shapeRefresh();}catch(_e){}} // 기본박(R.unit)은 박자표와 분리 — 그대로 유지
 function pickSig(){const s=SIGS[(Math.random()*SIGS.length)|0].split('/');return {num:+s[0],den:+s[1]};}
 
@@ -3024,9 +3031,22 @@ function mtCompute(){const qpmA=MT.A.bpm*unitQL(MT.A.unit),qpmB=MT.B.bpm*unitQL(
 function mtRender(){if(mode!=='meter')return;const C=mtCompute();
   const pct=r=>{const p=(r-1)*100;return Math.abs(p)<0.05?'변화 없음':(p>0?'+':'−')+Math.abs(p).toFixed(1)+'%';};
   const phrase=r=>{const p=(r-1)*100;return Math.abs(p)<0.05?'거의 그대로입니다':(p>0?p.toFixed(1)+'% 빨라집니다':(-p).toFixed(1)+'% 느려집니다');};
+  const _CONV=[['\u266a','8분음표',0.5],['\u2669','4분음표',1],['\u2669.','점4분음표',1.5],['\ud834\udd5d','2분음표',2],['\ud834\udd5d.','점2분음표',3]];
+  const convRow=function(side){
+    const s=MT[side], q=s.bpm*unitQL(s.unit);          /* 4분음표 기준 초당 개수(분당) */
+    const cur=unitQL(s.unit);
+    return _CONV.map(function(x){
+      const v=q/x[2], on=(Math.abs(x[2]-cur)<1e-6);
+      return '<span class="cvi'+(on?' on':'')+'">'+x[0]+'='+(v>=100?v.toFixed(0):v.toFixed(1))+'</span>';
+    }).join('');
+  };
   $('mtReadout').innerHTML=`<div class="mtrow"><span class="mtk">체감 박</span><b>${MT.A.bpm} → ${MT.B.bpm}</b><span class="mtp">${pct(C.feltRatio)}</span><span class="mtsub">지휘하는 박 수</span></div>`+
     `<div class="mtrow"><span class="mtk">실제 속도</span><b>${C.qpmA.toFixed(1)} → ${C.qpmB.toFixed(1)}</b><span class="mtp">${pct(C.actualRatio)}</span><span class="mtsub">♩ 환산</span></div>`+
-    `<div class="mtread">지휘 박은 <b style="color:var(--mint)">${MT.A.bpm}→${MT.B.bpm}</b>이지만, 음악이 실제로 흐르는 속도는 <b>${phrase(C.actualRatio)}</b>.</div>`;
+    `<div class="mtread">지휘 박은 <b style="color:var(--mint)">${MT.A.bpm}→${MT.B.bpm}</b>이지만, 음악이 실제로 흐르는 속도는 <b>${phrase(C.actualRatio)}</b>.</div>`+
+    `<div class="cvbox"><div class="cvhd">같은 속도를 다른 음표로 세면</div>`+
+    `<div class="cvrow"><span class="cvk">앞 ${MT.A.sig}</span>${convRow('A')}</div>`+
+    `<div class="cvrow"><span class="cvk">뒤 ${MT.B.sig}</span>${convRow('B')}</div>`+
+    `<div class="cvnote">굵게 표시된 것이 지금 기본박이에요. 8분음표 계열을 4분음표로 바꿔 세면 절반, 점4분음표로 세면 1/3이 됩니다.</div></div>`;
   $('mtPulse').innerHTML=mtPulseSVG();}
 function mtPulseSVG(){const A=mtInfo('A'),B=mtInfo('B'),W=420,baseY=92,top=42,subTop=64,T=A.measDur+B.measDur,x0=16,x1=W-16,span=x1-x0,sec=t=>x0+(t/T)*span;let _prepX=null;
   MTP.map={T:T,x0:x0/W,span:span/W};
@@ -3036,7 +3056,8 @@ function mtPulseSVG(){const A=mtInfo('A'),B=mtInfo('B'),W=420,baseY=92,top=42,su
   A.beats.forEach((bt,i)=>{const x=sec(bt.p*A.spq),last=(i===nA-1);
     s+=`<line x1="${x.toFixed(1)}" y1="${top}" x2="${x.toFixed(1)}" y2="${baseY}" stroke="#5fe0c0" stroke-width="${i===0?3:2}"/><circle class="bdot" data-t="${(bt.p*A.spq).toFixed(4)}" data-r="${i===0?8:5.5}" data-c="#5fe0c0" cx="${x.toFixed(1)}" cy="${top}" r="${i===0?8:5.5}" fill="#5fe0c0"/>`; // A 모든 박(마지막 포함)
     if(last&&MT.prep){const drawP=r=>{const xx=sec(r);_prepX=xx;s+=`<line x1="${xx.toFixed(1)}" y1="${(top-18).toFixed(1)}" x2="${xx.toFixed(1)}" y2="${baseY}" stroke="#7d93c8" stroke-width="2.6"/><circle class="bdot prepdot" data-t="${r.toFixed(4)}" data-r="9" data-c="#7d93c8" cx="${xx.toFixed(1)}" cy="${(top-18).toFixed(1)}" r="9" fill="#7d93c8"/>`;};
-      let any=false;for(let r=offT-Bbeat;r>bt.p*A.spq-1e-6;r-=Bbeat){drawP(r);any=true;}if(!any)drawP(Math.max(bt.p*A.spq,offT-Bbeat));}}); // 마지막 박 위 B 템포 릴레이션
+      drawP(Math.max(bt.p*A.spq,offT-Bbeat));   /* 전환박은 하나 */
+    }}); // 마지막 박 위 B 템포 릴레이션
   const xc=sec(A.measDur);s+=`<line x1="${(xc-2.5).toFixed(1)}" y1="${top-10}" x2="${(xc-2.5).toFixed(1)}" y2="${baseY+10}" stroke="#eaf1f2" stroke-width="1.5"/><line x1="${(xc+2.5).toFixed(1)}" y1="${top-10}" x2="${(xc+2.5).toFixed(1)}" y2="${baseY+10}" stroke="#eaf1f2" stroke-width="2.6"/>`;
   B.beats.forEach((bt,i)=>{const x=sec(A.measDur+bt.p*B.spq);s+=`<line x1="${x.toFixed(1)}" y1="${top}" x2="${x.toFixed(1)}" y2="${baseY}" stroke="#f1c47a" stroke-width="${i===0?3.4:2}"/><circle class="bdot" data-t="${(A.measDur+bt.p*B.spq).toFixed(4)}" data-r="${i===0?6.5:4}" data-c="#f1c47a" cx="${x.toFixed(1)}" cy="${top}" r="${i===0?6.5:4}" fill="#f1c47a"/>`;});
   s+=`<text x="${x0}" y="${baseY+22}" fill="#5fe0c0" font-size="16" font-family="system-ui">앞 ${MT.A.sig} · ♩=${MT.A.bpm}</text>`;
@@ -3050,7 +3071,9 @@ function mtSideUI(side){const s=MT[side],pre=side==='A'?'mta':'mtb',p=s.sig.spli
   $(pre+'Bpm').value=s.bpm;$(pre+'Bpm').oninput=e=>{s.bpm=Math.max(30,Math.min(280,+e.target.value||60));mtRender();mtRestart();};
   const go=groupOptions(num,den);show(pre+'GroupF',!!go);
   if(go)fillSel($(pre+'Group'),[['auto','자동']].concat(go.map(g=>[g.join('+'),g.join('+')])),s.group,v=>{s.group=v;mtRender();mtRestart();});}
-function mtBuildUI(){mtSideUI('A');mtSideUI('B');optBtns($('mtPrep'),['켬','끔'],op=>(op==='켬')===MT.prep,op=>{MT.prep=(op==='켬');mtBuildUI();mtRender();mtRestart();});}
+function mtBuildUI(){mtSideUI('A');mtSideUI('B');
+  optBtns($('mtPrep'),['켬','끔'],op=>(op==='켬')===MT.prep,
+    op=>{MT.prep=(op==='켬');mtBuildUI();mtRender();mtRestart();});}
 function mtCycle(key){const ev=[];
   if(key==='A'||key==='B'){const I=mtInfo(key);I.beats.forEach((bt,i)=>{ev.push({rel:bt.p*I.spq,kind:i===0?'down':'beat'});
       if(I.info.groups[i]>=2){const seg=bt.dur*I.spq/I.info.groups[i];for(let k=1;k<I.info.groups[i];k++)ev.push({rel:bt.p*I.spq+k*seg,kind:'sub'});}});
@@ -3059,7 +3082,7 @@ function mtCycle(key){const ev=[];
   A.beats.forEach((bt,i)=>{const last=(i===nA-1),aStart=bt.p*A.spq;
     ev.push({rel:aStart,kind:i===0?'down':'beat'}); // A의 모든 박(마지막 박 포함)을 그대로 친다
     if(A.info.groups[i]>=2){const seg=bt.dur*A.spq/A.info.groups[i];for(let k=1;k<A.info.groups[i];k++)ev.push({rel:aStart+k*seg,kind:'sub'});}
-    if(last&&MT.prep){let any=false;for(let r=off-Bbeat;r>aStart-1e-6;r-=Bbeat){ev.push({rel:r,kind:'prep'});any=true;}if(!any)ev.push({rel:Math.max(aStart,off-Bbeat),kind:'prep'});} // 마지막 박 위에 B 박·빠르기를 다운비트에서 거꾸로 겹쳐(릴레이션)
+    if(last&&MT.prep)ev.push({rel:Math.max(aStart,off-Bbeat),kind:'prep'});   /* 전환박은 하나 */ // 마지막 박 위에 B 박·빠르기를 다운비트에서 거꾸로 겹쳐(릴레이션)
   });
   B.beats.forEach((bt,i)=>{ev.push({rel:off+bt.p*B.spq,kind:i===0?'down':'beat'});if(B.info.groups[i]>=2){const seg=bt.dur*B.spq/B.info.groups[i];for(let k=1;k<B.info.groups[i];k++)ev.push({rel:off+bt.p*B.spq+k*seg,kind:'sub'});}});
   return {ev,dur:A.measDur+B.measDur};}
@@ -3286,7 +3309,7 @@ $('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;const g=t.da
 
 /* ===== 이론 모듈 (트레이닝 앱) ===== */
 (function(){
-var WHY={'3단계 — 인식 → 조사 → 비전':'조사에서 <b>규범과 다른 자리</b>를 표시해두고, 비전 단계에서 이유를 추론하세요. ① 어디서 벗어났나 ② 그때 베이스와 탑(선율)은 무엇을 하나 ③ 무엇을 부각하려 했나 ④ 그래서 나는 무엇을 들려줄까 — 이 네 물음이 해석의 뼈대예요.','① 화성의 기초 — 기능(T-S-D)':'기능은 작곡가가 청중의 몸에 거는 중력이에요. T를 길게 두면 안심을, D를 끌면 조바심을 심죠. 첫 물음은 늘 "왜 여기서 이 기능을 이만큼 머물게 했나".','② 종지 (Cadence)':'종지는 "여기서 숨을 어디까지 줄까"의 결정. PAC은 닫고, 반종지는 매달고, 위종지는 속여 악구를 늘려요 — 종지를 미룬 자리마다 의도가 숨어 있어요.','③ 화성 시퀀스':'시퀀스는 시간을 벌며 밀어붙이는 장치. 몇 번 반복하고 <b>언제 깨는가</b>가 곧 정점 설계 — 깨지는 지점이 작곡가가 노린 자리예요.','④ 갈랑 스키마타 (18C 관용구)':'숙어를 쓴 건 청중이 다음을 예감하게 하려는 것. 그래서 <b>숙어를 비트는 순간</b>이 진짜 의도 — 관용을 알아야 일탈이 보여요.','⑤ 반음계 화성':'반음계는 조성의 문을 살짝 여는 장치. 부속화음은 목표를 가리키는 손가락이고, 어두운 색(나폴리·증6)은 대개 종지를 극적으로 만들려는 준비예요.','⑥ 전조 (Modulation)':'전조는 무대를 옮기는 결정. 어디로(가까운/먼)·어떻게(피벗/직접) 갔는지가 서사 — 갑작스러울수록 그 순간을 특별하게 만들려는 의도예요.','⑦ 지속음·오스티나토·변주형식':'무언가를 고정한 건 나머지를 자유롭게 하려는 것. 페달은 긴장을 적재하고 오스티나토는 시간을 세워요 — 무엇을 붙들었는지 보면 무엇을 들려주려는지 보여요.','⑧ 동기·선율 전개':'동기 변형은 "같은 것을 다르게 말하기". 확대는 장중함, 축소는 조급함, 전위는 반전 — 어떤 변형을 골랐는지가 그 순간의 심리예요.','⑨ 비화성음 (화성 외음)':'비화성음은 화성이 아니라 표정. 계류를 길게 둘수록 그 아픔을 오래 보여주려는 것 — 그 시간을 지켜줄지 말지가 지휘자의 해석이에요.','⑩ 대위·모방·캐논':'성부를 얽는 건 여러 목소리를 동등하게 두려는 선택. 누가 먼저 말하고 누가 받는지가 곧 작곡가가 짠 대화의 구도예요.','⑪ 리듬·박자':'어긋냄(당김·헤미올라)은 실수가 아니라 설계. 격자를 흔든 자리마다 "여기를 몸으로 느껴라"는 신호가 있어요.','⑮ 짜임새 — 성부가 어떻게 얽히나':'짜임새 변화는 청중의 주의를 재배치하는 것. 폴리포니로 바뀌면 "여러 겹을 들어라", 유니즌은 "모두 하나로"라는 지시예요.','⑯ 셈여림':'셈여림은 감정이 아니라 구조의 표시. 정점을 어디 두었는지가 곡의 뼈대이고, 갑작스러운 p는 대개 다음 폭발의 준비예요.','⑰ 아고긱·템포 (Riemann 1884)':'템포 지시는 시간을 늘려 그 순간을 보게 하려는 것. rit이 붙은 자리 = 작곡가가 붙잡고 싶은 순간이에요.','⑮ 관현악법':'악기 선택은 색이자 의미. "왜 하필 이 선율을 오보에에 주었나" — 음색이 곧 화자(캐릭터)예요.','⑯ 화성색·음색 텍스처':'보이싱은 같은 화음의 다른 공간. 넓게 벌린 건 공간을, 뭉친 건 무게를 원한 것 — 배치 자체가 메시지예요.','⑰ 형식 · 기능 · 구조':'형식은 청중의 기억을 이용한 설계. 규범(재현·도착)을 <b>언제 지키고 언제 미뤘는지</b>가 의도이고, 어긴 자리가 곧 메시지예요.','⑱ 음악 수사학·음형론 (Figuren)':'음형은 작곡가가 심어둔 뜻. 라멘토·한숨·총휴지는 우연이 아니라 선택된 상징 — 찾아내면 해석의 근거가 돼요.','⑲ 토포스 (표상 이론)':'토포스는 청중과 공유하는 기억을 부르는 장치. 사냥·전원·교회 풍을 쓴 건 그 세계를 불러오려는 의도예요.','⑳ 시간·기억의 음악심리':'기대를 만들고 배신하는 것이 작곡의 핵심 기술. "여기서 왜 어긋냈나"가 곧 정서의 출처예요.','㉑ 해석사·연주 전통':'악보에 없는 것은 전통이 채워요. 그래서 작곡가의 의도는 악보 + 시대 관습 + 연주 전통을 함께 읽어야 복원돼요.','㉒ 신리만 변형이론 (PLR)':'기능으로 설명되지 않는 진행은 <b>색을 위해</b> 고른 것. 공통음을 붙들고 한 음만 움직인 건 최소 비용으로 세계를 바꾸려는 의도예요.','㉓ 20세기 이후 분석':'조성이 없으면 의도는 음향·질감·밀도에 있어요. "무엇으로 이 곡을 하나로 묶었나"를 물어야 해요.','㉔ 예술 횡단 · 구조 종합':'모든 발견을 하나의 긴장 곡선으로 모으는 것이 마지막 단계 — 의도는 국지가 아니라 전체의 형태로 드러나요.','3화음 · 7화음':'화음의 질 선택은 곡의 명암 결정. 같은 자리에 단3화음을 쓴 건 그늘을 원한 것, 7화음을 얹은 건 앞으로 밀려는 것이에요.','부가 · 6 · 상위 확장':'텐션을 얹은 건 기능은 그대로 두고 <b>색만</b> 바꾸려는 선택. 순진함을 지키며 반짝임만 더하고 싶을 때 add9를 골라요.','변화 딸림화음 (텐션)':'얼터드는 해결을 더 간절하게 만드는 극대 장치. ♭9는 근음 반음 위의 충돌, ♯9는 장3도와 단3도의 겹침, ♯11은 완전5도 반음 위, ♭13은 5도 반음 위의 눌림 — "왜 그냥 V7이 아니었나"를 물어야 해요.','화성 기능 T–S–D':'기능은 작곡가가 거는 중력 — 어디서 멈추고 어디로 밀지의 설계도예요.','종지 (Cadence)':'어디서 숨을 끊고 어디서 매달지의 결정 — 종지의 강도가 곧 구획의 크기예요.','전위 · 자리표 (Figured Bass)':'전위 선택은 <b>베이스를 노래하게</b> 하려는 것. 6/4는 대개 종지를 준비하거나 흐름을 잇기 위한 자리예요.'};
+var WHY={'3단계 — 인식 → 조사 → 비전':'조사에서 <b>규범과 다른 자리</b>를 표시해두고, 비전 단계에서 이유를 추론하세요. ① 어디서 벗어났나 ② 그때 베이스와 탑(선율)은 무엇을 하나 ③ 무엇을 부각하려 했나 ④ 그래서 나는 무엇을 들려줄까 — 이 네 물음이 해석의 뼈대예요.','① 화성의 기초 — 기능(T-S-D)':'기능은 작곡가가 청중의 몸에 거는 중력이에요. T를 길게 두면 안심을, D를 끌면 조바심을 심죠. 첫 물음은 늘 "왜 여기서 이 기능을 이만큼 머물게 했나".','② 종지 (Cadence)':'종지는 "여기서 숨을 어디까지 줄까"의 결정. PAC은 닫고, 반종지는 매달고, 위종지는 속여 악구를 늘려요 — 종지를 미룬 자리마다 의도가 숨어 있어요.','③ 화성 시퀀스':'시퀀스는 시간을 벌며 밀어붙이는 장치. 몇 번 반복하고 <b>언제 깨는가</b>가 곧 정점 설계 — 깨지는 지점이 작곡가가 노린 자리예요.','④ 갈랑 스키마타 (18C 관용구)':'숙어를 쓴 건 청중이 다음을 예감하게 하려는 것. 그래서 <b>숙어를 비트는 순간</b>이 진짜 의도 — 관용을 알아야 일탈이 보여요.','⑤ 반음계 화성':'반음계는 조성의 문을 살짝 여는 장치. 부속화음은 목표를 가리키는 손가락이고, 어두운 색(나폴리·증6)은 대개 종지를 극적으로 만들려는 준비예요.','⑥ 전조 (Modulation)':'전조는 무대를 옮기는 결정. 어디로(가까운/먼)·어떻게(피벗/직접) 갔는지가 서사 — 갑작스러울수록 그 순간을 특별하게 만들려는 의도예요.','⑦ 지속음·오스티나토·변주형식':'무언가를 고정한 건 나머지를 자유롭게 하려는 것. 페달은 긴장을 적재하고 오스티나토는 시간을 세워요 — 무엇을 붙들었는지 보면 무엇을 들려주려는지 보여요.','⑧ 동기·선율 전개':'동기 변형은 "같은 것을 다르게 말하기". 확대는 장중함, 축소는 조급함, 전위는 반전 — 어떤 변형을 골랐는지가 그 순간의 심리예요.','⑨ 비화성음 (화성 외음)':'비화성음은 화성이 아니라 표정. 계류를 길게 둘수록 그 아픔을 오래 보여주려는 것 — 그 시간을 지켜줄지 말지가 지휘자의 해석이에요.','⑩ 대위·모방·캐논':'성부를 얽는 건 여러 목소리를 동등하게 두려는 선택. 누가 먼저 말하고 누가 받는지가 곧 작곡가가 짠 대화의 구도예요.','⑪ 리듬·박자':'어긋냄(당김·헤미올라)은 실수가 아니라 설계. 격자를 흔든 자리마다 "여기를 몸으로 느껴라"는 신호가 있어요.','⑯ 짜임새 — 성부가 어떻게 얽히나':'짜임새 변화는 청중의 주의를 재배치하는 것. 폴리포니로 바뀌면 "여러 겹을 들어라", 유니즌은 "모두 하나로"라는 지시예요.','⑰ 셈여림':'셈여림은 감정이 아니라 구조의 표시. 정점을 어디 두었는지가 곡의 뼈대이고, 갑작스러운 p는 대개 다음 폭발의 준비예요.','⑱ 아고긱·템포 (Riemann 1884)':'템포 지시는 시간을 늘려 그 순간을 보게 하려는 것. rit이 붙은 자리 = 작곡가가 붙잡고 싶은 순간이에요.','⑮ 관현악법':'악기 선택은 색이자 의미. "왜 하필 이 선율을 오보에에 주었나" — 음색이 곧 화자(캐릭터)예요.','⑯ 화성색·음색 텍스처':'보이싱은 같은 화음의 다른 공간. 넓게 벌린 건 공간을, 뭉친 건 무게를 원한 것 — 배치 자체가 메시지예요.','⑰ 형식 · 기능 · 구조':'형식은 청중의 기억을 이용한 설계. 규범(재현·도착)을 <b>언제 지키고 언제 미뤘는지</b>가 의도이고, 어긴 자리가 곧 메시지예요.','⑱ 음악 수사학·음형론 (Figuren)':'음형은 작곡가가 심어둔 뜻. 라멘토·한숨·총휴지는 우연이 아니라 선택된 상징 — 찾아내면 해석의 근거가 돼요.','⑲ 토포스 (표상 이론)':'토포스는 청중과 공유하는 기억을 부르는 장치. 사냥·전원·교회 풍을 쓴 건 그 세계를 불러오려는 의도예요.','⑳ 시간·기억의 음악심리':'기대를 만들고 배신하는 것이 작곡의 핵심 기술. "여기서 왜 어긋냈나"가 곧 정서의 출처예요.','㉑ 해석사·연주 전통':'악보에 없는 것은 전통이 채워요. 그래서 작곡가의 의도는 악보 + 시대 관습 + 연주 전통을 함께 읽어야 복원돼요.','㉒ 신리만 변형이론 (PLR)':'기능으로 설명되지 않는 진행은 <b>색을 위해</b> 고른 것. 공통음을 붙들고 한 음만 움직인 건 최소 비용으로 세계를 바꾸려는 의도예요.','㉓ 20세기 이후 분석':'조성이 없으면 의도는 음향·질감·밀도에 있어요. "무엇으로 이 곡을 하나로 묶었나"를 물어야 해요.','㉔ 예술 횡단 · 구조 종합':'모든 발견을 하나의 긴장 곡선으로 모으는 것이 마지막 단계 — 의도는 국지가 아니라 전체의 형태로 드러나요.','3화음 · 7화음':'화음의 질 선택은 곡의 명암 결정. 같은 자리에 단3화음을 쓴 건 그늘을 원한 것, 7화음을 얹은 건 앞으로 밀려는 것이에요.','부가 · 6 · 상위 확장':'텐션을 얹은 건 기능은 그대로 두고 <b>색만</b> 바꾸려는 선택. 순진함을 지키며 반짝임만 더하고 싶을 때 add9를 골라요.','변화 딸림화음 (텐션)':'얼터드는 해결을 더 간절하게 만드는 극대 장치. ♭9는 근음 반음 위의 충돌, ♯9는 장3도와 단3도의 겹침, ♯11은 완전5도 반음 위, ♭13은 5도 반음 위의 눌림 — "왜 그냥 V7이 아니었나"를 물어야 해요.','화성 기능 T–S–D':'기능은 작곡가가 거는 중력 — 어디서 멈추고 어디로 밀지의 설계도예요.','종지 (Cadence)':'어디서 숨을 끊고 어디서 매달지의 결정 — 종지의 강도가 곧 구획의 크기예요.','전위 · 자리표 (Figured Bass)':'전위 선택은 <b>베이스를 노래하게</b> 하려는 것. 6/4는 대개 종지를 준비하거나 흐름을 잇기 위한 자리예요.'};
 function thGrp(t,b,o){var _w=WHY[t]?'<div class="th-why">✍ <b>작곡가의 선택</b> · '+WHY[t]+'</div>':'';return '<div class="thg'+(o?' open':'')+'"><div class="thg-h" onclick="thTog(this)"><span class="thg-i">'+(o?'▾':'▸')+'</span>'+t+'</div><div class="thg-b">'+b+_w+'</div></div>';}
 function thTbl(hs,rs){return '<table class="thtbl"><thead><tr>'+hs.map(function(x){return '<th>'+x+'</th>';}).join('')+'</tr></thead><tbody>'+rs+'</tbody></table>';}
 function thRow(){return '<tr>'+Array.prototype.slice.call(arguments).map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}
@@ -3387,11 +3410,30 @@ A.push(thGrp('⑭ 연주 관습 \u2014 악보에 없지만 모두가 하는 것'
     thRow('오케 실무','금관 마지막 화음은 조금 길게 \u00b7 <b>팀파니 롤은 크레셴도가 기본</b> \u00b7 다운보우가 강세를 만든다 \u00b7 관악 솔로 앞 미세한 여유'))+
   thNote('같은 바흐라도 아르농쿠르와 카라얀은 다른 관습을 씁니다. 어느 쪽이 옳은가가 아니라 <b>무엇을 골랐는지 일관된가</b>가 기준이에요.')
 ));
-A.push(thGrp('⑮ 짜임새 — 성부가 어떻게 얽히나',thP('성부(층)들이 서로 어떤 관계로 얽히는가. 선율 하나뿐인지, 선율+반주인지, 독립 선율들이 얽히는지 — 이걸 알아야 발란스를 설계해요.')+
+A.push(thGrp('⑮ 편곡 — 옮기기와 다시 짓기',
+  thP('같은 원곡을 다루는데 <b>원곡의 권위가 어디에 있는가</b>로 갈려요.')+
+  thTbl(['방향','하는 일'],
+    thRow('<b>트랜스크립션</b> transcription','음높이·리듬·화성을 <b>보존</b>하고 매체만 바꾼다. 리스트의 베토벤 교향곡 피아노판.')+
+    thRow('<b>어레인지먼트</b> arrangement','화성을 바꾸고 형식을 늘이거나 줄이고 새 대선율을 넣는다. <b>편곡자의 발언</b>이 들어간다.'))+
+  thP('경계는 칼같지 않아요 — 리스트의 전사도 피아노 관용구로 옮기며 실질적 재작곡이 일어나고, 부조니는 <b>「창조적 전사」</b>를 주장했습니다.')+
+  thTbl(['갈래','뜻'],
+    thRow('리덕션 reduction','총보를 피아노로 줄이기. 연습·리허설용.')+
+    thRow('오케스트레이션','피아노곡·스케치를 관현악으로. 라벨의 「전람회의 그림」.')+
+    thRow('패러프레이즈','주제만 가져와 자유롭게 확장. 리스트의 오페라 환상곡.')+
+    thRow('리하모니제이션','선율은 두고 <b>화성만</b> 바꾸기.')+
+    thRow('콘트라팍툼','선율은 두고 <b>가사만</b> 바꾸기.'))+
+  thTbl(['주제 변형','내용'],
+    thRow('확대 augmentation','음가를 2배로 — 시간축 변형. 푸가 스트레토, 정선율, 소나타 코다.')+
+    thRow('축소 diminution','음가를 절반으로. ⚠ 바로크에서는 <b>긴 음을 잘게 쪼개는 즉흥 장식</b>을 뜻하기도 한다(diminuzione·division).')+
+    thRow('전위·역행','음높이축 변형. 시간축과 조합하면 12음 기법의 네 형태가 나온다.'))+
+  thNote('지휘 — 확대형은 손이 <b>더 크고 느리게</b>, 축소형은 <b>작고 촘촘하게</b>. 둘이 겹치면 오른손은 기본 박을 지키고 확대형 성부는 시선·왼손으로 짚어요.')+
+  thNote('국악 관현악 — 민요를 옮길 때 <b>시김새·농현을 어디까지 보존할지</b>가 전사냐 편곡이냐를 가릅니다. 기보 순간 정간보의 신축 폭이 서양식 마디에 갇히니 완전한 전사는 사실상 어려워요.')
+));
+A.push(thGrp('⑯ 짜임새 — 성부가 어떻게 얽히나',thP('성부(층)들이 서로 어떤 관계로 얽히는가. 선율 하나뿐인지, 선율+반주인지, 독립 선율들이 얽히는지 — 이걸 알아야 발란스를 설계해요.')+
   thUL([['모노포니','선율 하나. 옥타브 유니즌도 포함. 성가·독창 민요'],['바이포니·드론','긴 지속음 위 다른 선율. 백파이프·탐부라'],['호모포니','주선율+화음 반주. 선율+반주 / 코랄(동음형 SATB)'],['폴리포니(대위)','독립 선율 둘+ 동시에 얽힘. 바흐 푸가·돌림노래'],['헤테로포니','같은 선율을 각자 조금씩 다르게(장식·타이밍). 동아시아 합주'],['핵심','한 곡 안에서 계속 바뀜 → "지금 호모/폴리?"를 늘 의식해 발란스']])));
-A.push(thGrp('⑯ 셈여림',thP('소리 크기 변화가 어떻게 설계되는가. 계단식·점진·즉각 변화가 화성 긴장과 맞물려 하나의 \'다이내믹 아치\'를 이뤄요.')+
+A.push(thGrp('⑰ 셈여림',thP('소리 크기 변화가 어떻게 설계되는가. 계단식·점진·즉각 변화가 화성 긴장과 맞물려 하나의 \'다이내믹 아치\'를 이뤄요.')+
   thUL([['계단식','단으로 뚝뚝(바로크)'],['메사 디 보체','한 음 &lt;&gt;로 부풀렸다 줄임'],['만하임','크레셴도·로켓·롤러·한숨·그랜드 포즈'],['로시니 크레셴도','반복→단축→악기 추가→음역 상승'],['즉각 변화','subito·sf/sfz·fp·rf'],['기능적 크레셴도','화성 긴장과 맞물려 정점으로 향하는 다이내믹 아치']])));
-A.push(thGrp('⑰ 아고긱·템포 (Riemann 1884)',thP('박을 미세하게 늘이고 줄이는 \'시간의 표정\'. 음량이 아니라 타이밍으로 강세를 주고, 루바토로 숨을 불어넣어요.')+
+A.push(thGrp('⑱ 아고긱·템포 (Riemann 1884)',thP('박을 미세하게 늘이고 줄이는 \'시간의 표정\'. 음량이 아니라 타이밍으로 강세를 주고, 루바토로 숨을 불어넣어요.')+
   thUL([['아고긱 악센트','음을 살짝 길게 늘여 강세(음량 없이 도드라지게)'],['템포 루바토','선율 루바토(반주는 일정) / 전체 루바토'],['점진','rit·rall / accel / allargando / calando·morendo'],['급격','ritenuto / stringendo / a tempo'],['정지·호흡','페르마타·테누토·루프트파우제'],['뤼시 규칙','상행=조임, 하행=늦춤']])));
 A.push(thGrp('⑮ 관현악법',
   thP('<b>7개의 축</b>: 편성·배합방식·주법·음역·수(solo/divisi/tutti)·짜임새 역할·셈여림/아고긱')+
