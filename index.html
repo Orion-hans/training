@@ -1816,13 +1816,13 @@ function forceCadenceRhythm(md,endType){const n=md.length;if(n<2)return;const LO
     pDurs.forEach((d,i)=>{const last=(i===N-1),pit=last?penRes:(i%2===0?domRoot:penRes);
       if(sub==='cont'){pcm.push({midi:pit,ql:d,art:'accent'});pbm.push({midi:pBass,ql:d});}
       else if(sub==='altern'){if(i%2===0||last)pcm.push({midi:pit,ql:d,art:'accent'});else pcm.push({midi:null,ql:d});pbm.push({midi:pBass,ql:d});}
-      else{let nn=d>=1.5?1:(d>=1?0.5:d),rr=+(d-nn).toFixed(3);pcm.push({midi:pit,ql:nn,art:'accent'});pbm.push({midi:pBass,ql:nn});if(rr>1e-6){pcm.push({midi:null,ql:rr});pbm.push({midi:pBass,ql:rr});}}});
+      else{let nn=d>=1.5?1:(d>=1?0.5:d),rr=+(d-nn).toFixed(3);pcm.push({midi:pit,ql:nn,art:'accent'});pbm.push({midi:pBass,ql:nn});if(rr>1e-6){fillDur(rr).forEach(dd=>{pcm.push({midi:null,ql:dd});pbm.push({midi:pBass,ql:dd});});}}});
     pen.cells=pcm;pen.bassCells=pbm;holdButton(finPitch,{holdDyn:1.3,art:'accent',lastDyn:1.5,two:Math.random()<0.45,cut:true});
     setDyn(pen.cells,1.15);clearHp(pen);clearHp(fin);pen.dynMark='f';pen.dynBase=1.12;fin.dynMark='ff';fin.dynBase=1.42;pen.homophonic=true;fin.homophonic=true;}
   else if(endType==='emphatic'){const pd=fillDur(pen.q);pen.cells=pd.map(d=>({midi:penRes,ql:d}));pen.bassCells=pd.map(d=>({midi:pBass,ql:d})); // 전마디 ti/re 지속(cresc)→으뜸 강타
     const two=Math.random()<0.5;
-    if(two&&fDurs.length>=2){const d0=fDurs[0],d1=fDurs[1],rest=+(fin.q-d0-d1).toFixed(3);fin.cells=[{midi:finPitch,ql:d0,art:'accent'},{midi:finPitch,ql:d1,art:'accent'}];fin.bassCells=[{midi:fBass,ql:d0},{midi:fBass,ql:d1}];if(rest>1e-6){fin.cells.push({midi:null,ql:rest});fin.bassCells.push({midi:fBass,ql:rest});}}
-    else{const d0=fDurs[0],rest=+(fin.q-d0).toFixed(3);fin.cells=[{midi:finPitch,ql:d0,art:'accent'}];fin.bassCells=[{midi:fBass,ql:d0}];if(rest>1e-6){fin.cells.push({midi:null,ql:rest});fin.bassCells.push({midi:fBass,ql:rest});}}
+    if(two&&fDurs.length>=2){const d0=fDurs[0],d1=fDurs[1],rest=+(fin.q-d0-d1).toFixed(3);fin.cells=[{midi:finPitch,ql:d0,art:'accent'},{midi:finPitch,ql:d1,art:'accent'}];fin.bassCells=[{midi:fBass,ql:d0},{midi:fBass,ql:d1}];if(rest>1e-6){fillDur(rest).forEach(dd=>{fin.cells.push({midi:null,ql:dd});fin.bassCells.push({midi:fBass,ql:dd});});}}
+    else{const d0=fDurs[0],rest=+(fin.q-d0).toFixed(3);fin.cells=[{midi:finPitch,ql:d0,art:'accent'}];fin.bassCells=[{midi:fBass,ql:d0}];if(rest>1e-6){fillDur(rest).forEach(dd=>{fin.cells.push({midi:null,ql:dd});fin.bassCells.push({midi:fBass,ql:dd});});}}
     setDyn(pen.cells,1.05);setDyn(fin.cells,1.45);cresc(pen,0.6,3.7,1.0);clearHp(fin);fin.dynMark='ff';fin.dynBase=1.45;fin.homophonic=true;}
   else if(endType==='trill'){const lastB=pDurs[pDurs.length-1],headDur=+(pen.q-lastB).toFixed(3); // 전마디 끝박 트릴(ti/re와 윗음 교대)→으뜸 해결
     const tNote=penRes,up=upScale(tNote);const cs=[],bc=[];
